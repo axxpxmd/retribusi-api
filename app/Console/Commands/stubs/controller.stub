@@ -1,0 +1,23 @@
+<?php
+
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Description of welcome
+ *
+ * @author Asip Hamdi
+ * Github : axxpxmd
+ */
+
+namespace DummyNamespace;
+
+use Illuminate\Http\Request;
+use DummyRootNamespaceHttp\Controllers\Controller;
+
+class DummyClass extends Controller
+{
+    //
+}
