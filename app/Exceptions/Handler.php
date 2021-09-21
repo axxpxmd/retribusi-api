@@ -60,6 +60,19 @@ class Handler extends ExceptionHandler
         } elseif ($exception instanceof HttpException) {
             $message = $exception->getMessage() ? $exception->getMessage() : Response::$statusTexts[$rendered->getStatusCode()];
             $exception = new HttpException($rendered->getStatusCode(), $message);
+        } else if ($exception instanceof ValidationException) {
+            $messages = [];
+            foreach ($exception->errors() as $key => $value) {
+                $messages += [$key => $value[0]];
+            }
+            return response()->json([
+                'status'  => $rendered->getStatusCode(),
+                'message' => $exception->getMessage(),
+                'error'   => [
+                    'message'   => $messages,
+                    'parameter' => $request->all(),
+                ]
+            ], 400);
         } else {
             $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
             $message = env('APP_DEBUG', false) ? $exception->getMessage() : Response::$statusTexts[$statusCode];

@@ -53,7 +53,7 @@ class CallBackController extends Controller
             } else {
                 $data->update([
                     'status_bayar' => 1,
-                    'tgl_bayar' => $transaction_time,
+                    'tgl_bayar'    => $transaction_time,
                     'total_bayar_bjb' => $transaction_amount
                 ]);
             }

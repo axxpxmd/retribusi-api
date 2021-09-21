@@ -30,13 +30,14 @@ class SKRDController extends Controller
         try {
             $data = TransaksiOPD::where('no_bayar', $no_bayar)->first();
 
-            if ($data == null) {
+            if ($data == null)
                 return response()->json([
                     'status'  => 404,
-                    'message' => 'Tidak ada data disini.'
+                    'message' => 'Data nomor bayar tidak ditemukan.'
                 ], 404);
-            }
 
+
+            // Check rincian jenis (kode_rekening, nama_rekening)
             if ($data->rincian_jenis == null) {
                 $kode_rekening = '-';
                 $nama_rekening = '-';
@@ -61,7 +62,7 @@ class SKRDController extends Controller
 
                 'ketetapan' => $data->jumlah_bayar,
                 // 'denda'        => $data->denda,
-                'diskon'       => $data->diskon,
+                'diskon'       => $data->diskon == null ? 0 : $data->diskon,
                 'total_bayar'  => $data->total_bayar,
                 // 'total_bayar_bjb'  => $data->total_bayar_bjb,
 
@@ -80,7 +81,7 @@ class SKRDController extends Controller
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Succesfully',
+                'message' => 'Success',
                 'data'    => $data
             ], 200);
         } catch (\Throwable $th) {
@@ -109,7 +110,7 @@ class SKRDController extends Controller
             if ($data == null) {
                 return response()->json([
                     'status'  => 404,
-                    'message' => 'Error, Tidak ada data disini.'
+                    'message' => 'Data nomor bayar tidak ditemukan.'
                 ], 404);
             }
 

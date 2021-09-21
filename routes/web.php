@@ -20,7 +20,6 @@ $router->get('/', function () use ($router) {
 /** Auth */
 $router->group(['prefix' => 'auth', 'namespace' => 'Auth'], function () use ($router) {
     $router->post('login', 'AuthController@login');
-    // $router->post('logout', 'AuthController@logout');
 });
 
 /** SKRD */
