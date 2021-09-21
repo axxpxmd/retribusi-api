@@ -23,14 +23,6 @@ use App\Models\TransaksiOPD;
 
 class SKRDController extends Controller
 {
-    public function checkNoBayar()
-    {
-        return response()->json([
-            'status'  => 404,
-            'message' => 'No bayar tidak boleh kosong.'
-        ], 404);
-    }
-
     public function invoice(Request $request, $no_bayar)
     {
         $no_bayar = $no_bayar;
