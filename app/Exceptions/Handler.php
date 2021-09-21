@@ -2,12 +2,14 @@
 
 namespace App\Exceptions;
 
+use Throwable;
+use Illuminate\Http\Response;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Throwable;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -49,29 +51,25 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        if ($exception instanceof MethodNotAllowedHttpException) {
-            return response()->json([
-                'status'    => 405,
-                'message'  => 'Method Not allowed',
-                'exception' => 'MethodNotAllowedHttpException',
-            ], 405);
-        } else if ($exception instanceof ValidationException) {
-            $messages = [];
+        $rendered = parent::render($request, $exception);
 
-            foreach ($exception->errors() as $key => $value) {
-                $messages += [$key => $value[0]];
-            }
-
-            return response()->json([
-                'status'  => 400,
-                'message' => 'The given data was invalid.',
-                'error'   => [
-                    'message'   => $messages,
-                    'parameter' => $request->all(),
-                ]
-            ], 400);
+        if ($exception instanceof NotFoundHttpException) {
+            //You can do any change as per your requrement here for the not found exception
+            $message = $exception->getMessage() ? $exception->getMessage() : Response::$statusTexts[$rendered->getStatusCode()];
+            $exception = new NotFoundHttpException($message, $exception);
+        } elseif ($exception instanceof HttpException) {
+            $message = $exception->getMessage() ? $exception->getMessage() : Response::$statusTexts[$rendered->getStatusCode()];
+            $exception = new HttpException($rendered->getStatusCode(), $message);
         } else {
-            return parent::render($request, $exception);
+            $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
+            $message = env('APP_DEBUG', false) ? $exception->getMessage() : Response::$statusTexts[$statusCode];
+            $exception = new HttpException($statusCode, $message);
         }
+
+        // Resonse 
+        return response()->json([
+            'status'  => $rendered->getStatusCode(),
+            'message' => $exception->getMessage()
+        ], $rendered->getStatusCode());
     }
 }
