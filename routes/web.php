@@ -29,3 +29,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('invoice/{no_bayar}', 'SKRDController@invoice');
     $router->put('invoice/update/{id}', 'SKRDController@update');
 });
+
+/** CallBack */
+$router->post('callback', 'CallBackController@callBack');
