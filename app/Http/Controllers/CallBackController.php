@@ -40,7 +40,7 @@ class CallBackController extends Controller
         try {
             $where = [
                 'nomor_va_bjb' => $va_number,
-                'no_bayar' => $client_refnum,
+                'no_bayar' => $client_refnum
             ];
 
             $data = TransaksiOPD::where($where)->first();
@@ -54,7 +54,8 @@ class CallBackController extends Controller
                 $data->update([
                     'status_bayar' => 1,
                     'tgl_bayar'    => $transaction_time,
-                    'total_bayar_bjb' => $transaction_amount
+                    'total_bayar_bjb' => $transaction_amount,
+                    'updated_by' => 'BJB From API Callback'
                 ]);
             }
 
