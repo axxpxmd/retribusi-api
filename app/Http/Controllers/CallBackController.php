@@ -34,6 +34,7 @@ class CallBackController extends Controller
         $ipBJB  = config('app.ipbjb');
         $ipKMNF = config('app.ipkmnf');
 
+        // NTB (encrypt no_bayar)
         $ntb = \md5($client_refnum);
 
         // Check Status (status must 2)
@@ -44,6 +45,7 @@ class CallBackController extends Controller
             ], 422);
 
         try {
+            // Check IP
             if ($ip == $ipBJB || $ip == $ipKMNF) {
                 $where = [
                     'nomor_va_bjb' => $va_number,
@@ -74,7 +76,7 @@ class CallBackController extends Controller
             } else {
                 return response()->json([
                     'status'  => 401,
-                    'message' => 'Error, Akses ditolak.',
+                    'message' => 'Error, Akses ditolak.' . $ip,
                 ], 401);
             }
         } catch (\Throwable $th) {
