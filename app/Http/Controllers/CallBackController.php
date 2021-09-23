@@ -32,9 +32,10 @@ class CallBackController extends Controller
 
         $ip     = $request->ip();
         $ipBJB  = config('app.ipbjb');
+        $ipBJB2 = config('app.ipbjb2');
         $ipKMNF = config('app.ipkmnf');
 
-        // NTB (encrypt no_bayar)
+        // NTB (encrypt no_bayar)   
         $ntb = \md5($client_refnum);
 
         // Check Status (status must 2)
@@ -46,7 +47,7 @@ class CallBackController extends Controller
 
         try {
             // Check IP
-            if ($ip == $ipBJB || $ip == $ipKMNF) {
+            if ($ip == $ipBJB || $ip == $ipBJB2 || $ip == $ipKMNF) {
                 $where = [
                     'nomor_va_bjb' => $va_number,
                     'no_bayar' => $client_refnum
