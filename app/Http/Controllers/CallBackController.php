@@ -30,17 +30,18 @@ class CallBackController extends Controller
         $transaction_time   = $request->transaction_time;
         $transaction_amount = $request->transaction_amount;
 
-        $ip    = $request->ip();
-        $ipBJB = config('app.ipbjb');
+        $ip     = $request->ip();
+        $ipBJB  = config('app.ipbjb');
+        $ipKMNF = config('app.ipkmnf');
 
         $ntb = \md5($client_refnum);
 
         // Check IP
-        // if ($ip != $ipBJB)
-        //     return response()->json([
-        //         'status'  => 401,
-        //         'message' => 'Error, Akses ditolak.',
-        //     ], 401);
+        if ($ip != $ipBJB || $ip != $ipKMNF)
+            return response()->json([
+                'status'  => 401,
+                'message' => 'Error, Akses ditolak.',
+            ], 401);
 
         // Check Status (status must 2)
         if ($status != 2)
