@@ -76,7 +76,7 @@ class CallBackController extends Controller
             } else {
                 return response()->json([
                     'status'  => 401,
-                    'message' => 'Error, Akses ditolak.' . $ip,
+                    'message' => 'Error, Akses ditolak: ' . $ip,
                 ], 401);
             }
         } catch (\Throwable $th) {
