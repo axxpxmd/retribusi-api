@@ -34,6 +34,8 @@ class CallBackController extends Controller
         $ipBJB  = config('app.ipbjb');
         $ipKMNF = config('app.ipkmnf');
 
+        dd($ip . ' - ' . $ipKMNF);
+
         $ntb = \md5($client_refnum);
 
         // Check IP
