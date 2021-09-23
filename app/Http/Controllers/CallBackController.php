@@ -30,6 +30,7 @@ class CallBackController extends Controller
         $transaction_time = $request->transaction_time;
         $transaction_amount = $request->transaction_amount;
         $status = $request->status;
+        $ip = $request->ip();
 
         if ($status != 2)
             return response()->json([
@@ -55,7 +56,8 @@ class CallBackController extends Controller
                     'status_bayar' => 1,
                     'tgl_bayar'    => $transaction_time,
                     'total_bayar_bjb' => $transaction_amount,
-                    'updated_by' => 'BJB From API Callback'
+                    'updated_by' => 'BJB From API Callback',
+                    'check_ip' => $ip
                 ]);
             }
 
