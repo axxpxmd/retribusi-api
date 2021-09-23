@@ -24,14 +24,24 @@ class CallBackController extends Controller
 {
     public function callBack(Request $request)
     {
-        // get Params
-        $va_number = $request->va_number;
+        $status        = $request->status;
+        $va_number     = $request->va_number;
         $client_refnum = $request->client_refnum;
-        $transaction_time = $request->transaction_time;
+        $transaction_time   = $request->transaction_time;
         $transaction_amount = $request->transaction_amount;
-        $status = $request->status;
-        $ip = $request->ip();
 
+        $ip = $request->ip();
+        $ipBJB = config('app.ipbjb');
+
+        // Check IP
+        if ($ip != $ipBJB)
+            return response()->json([
+                'status'  => 401,
+                'message' => 'Error, tidak memiliki izin yang tepat.',
+            ], 401);
+
+
+        // Check Status (status must 2)
         if ($status != 2)
             return response()->json([
                 'status'  => 422,
