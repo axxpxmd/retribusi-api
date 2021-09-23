@@ -36,13 +36,6 @@ class CallBackController extends Controller
 
         $ntb = \md5($client_refnum);
 
-        // Check IP
-        if ($ip != $ipBJB || $ip != $ipKMNF)
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Error, Akses ditolak.',
-            ], 401);
-
         // Check Status (status must 2)
         if ($status != 2)
             return response()->json([
@@ -51,32 +44,39 @@ class CallBackController extends Controller
             ], 422);
 
         try {
-            $where = [
-                'nomor_va_bjb' => $va_number,
-                'no_bayar' => $client_refnum
-            ];
-            $data = TransaksiOPD::where($where)->first();
+            if ($ip == $ipBJB || $ip == $ipKMNF) {
+                $where = [
+                    'nomor_va_bjb' => $va_number,
+                    'no_bayar' => $client_refnum
+                ];
+                $data = TransaksiOPD::where($where)->first();
 
-            if ($data == null) {
+                if ($data == null) {
+                    return response()->json([
+                        'status'  => 404,
+                        'message' => 'Error, Data nomor bayar tidak ditemukan.',
+                    ], 404);
+                } else {
+                    $data->update([
+                        'status_bayar' => 1,
+                        'tgl_bayar'    => $transaction_time,
+                        'total_bayar_bjb' => $transaction_amount,
+                        'updated_by'      => 'BJB From API Callback',
+                        'ntb'      => $ntb,
+                        'check_ip' => $ip
+                    ]);
+                }
+
                 return response()->json([
-                    'status'  => 404,
-                    'message' => 'Error, Data nomor bayar tidak ditemukan.',
-                ], 404);
+                    'status'  => 200,
+                    'message' => 'Success',
+                ], 200);
             } else {
-                $data->update([
-                    'status_bayar' => 1,
-                    'tgl_bayar'    => $transaction_time,
-                    'total_bayar_bjb' => $transaction_amount,
-                    'updated_by'      => 'BJB From API Callback',
-                    'ntb'      => $ntb,
-                    'check_ip' => $ip
-                ]);
+                return response()->json([
+                    'status'  => 401,
+                    'message' => 'Error, Akses ditolak.',
+                ], 401);
             }
-
-            return response()->json([
-                'status'  => 200,
-                'message' => 'Success',
-            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => $th->getMessage(),
