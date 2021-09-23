@@ -34,12 +34,11 @@ class CallBackController extends Controller
         $ipBJB = config('app.ipbjb');
 
         // Check IP
-        if ($ip != $ipBJB)
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Error, tidak memiliki izin yang tepat.',
-            ], 401);
-
+        // if ($ip != $ipBJB)
+        //     return response()->json([
+        //         'status'  => 401,
+        //         'message' => 'Error, tidak memiliki izin yang tepat.',
+        //     ], 401);
 
         // Check Status (status must 2)
         if ($status != 2)
