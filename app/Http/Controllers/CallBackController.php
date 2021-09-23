@@ -30,14 +30,16 @@ class CallBackController extends Controller
         $transaction_time   = $request->transaction_time;
         $transaction_amount = $request->transaction_amount;
 
-        $ip = $request->ip();
+        $ip    = $request->ip();
         $ipBJB = config('app.ipbjb');
+
+        $ntb = \md5($client_refnum);
 
         // Check IP
         // if ($ip != $ipBJB)
         //     return response()->json([
         //         'status'  => 401,
-        //         'message' => 'Error, tidak memiliki izin yang tepat.',
+        //         'message' => 'Error, Akses ditolak.',
         //     ], 401);
 
         // Check Status (status must 2)
@@ -52,7 +54,6 @@ class CallBackController extends Controller
                 'nomor_va_bjb' => $va_number,
                 'no_bayar' => $client_refnum
             ];
-
             $data = TransaksiOPD::where($where)->first();
 
             if ($data == null) {
@@ -65,7 +66,8 @@ class CallBackController extends Controller
                     'status_bayar' => 1,
                     'tgl_bayar'    => $transaction_time,
                     'total_bayar_bjb' => $transaction_amount,
-                    'updated_by' => 'BJB From API Callback',
+                    'updated_by'      => 'BJB From API Callback',
+                    'ntb'      => $ntb,
                     'check_ip' => $ip
                 ]);
             }
