@@ -23,7 +23,7 @@ use App\Models\TransaksiOPD;
 
 class SKRDController extends Controller
 {
-    public function invoice(Request $request, $no_bayar)
+    public function invoice($no_bayar)
     {
         $no_bayar = $no_bayar;
 
@@ -47,11 +47,11 @@ class SKRDController extends Controller
             }
 
             $data = array(
-                'id' => Crypt::encrypt($data->id),
-                'no_bayar'      => $data->no_bayar,
-                'nama_penyetor' => $data->nm_wajib_pajak,
+                'id'     => Crypt::encrypt($data->id),
                 'alamat' => $data->alamat_wp,
                 'lokasi' => $data->lokasi,
+                'no_bayar'      => $data->no_bayar,
+                'nama_penyetor' => $data->nm_wajib_pajak,
 
                 'nama_skpd'        => $data->opd->n_opd,
                 'kode_skpd'        => $data->opd->kode,
@@ -60,22 +60,15 @@ class SKRDController extends Controller
                 'jenis_pendapaan'  => $data->jenis_pendapatan->jenis_pendapatan,
                 'uraian_retribusi' => $data->uraian_retribusi,
 
-                'ketetapan' => $data->jumlah_bayar,
-                // 'denda'        => $data->denda,
-                'diskon'       => $data->diskon == null ? 0 : $data->diskon,
-                'total_bayar'  => $data->total_bayar,
-                // 'total_bayar_bjb'  => $data->total_bayar_bjb,
+                'ketetapan'   => $data->jumlah_bayar,
+                'diskon'      => $data->diskon == null ? 0 : $data->diskon,
+                'total_bayar' => $data->total_bayar,
 
                 'no_skrd'        => $data->no_skrd,
                 'tgl_skrd_awal'  => $data->tgl_skrd_awal,
                 'tgl_skrd_akhir' => $data->tgl_skrd_akhir,
-                // 'tgl_bayar' => $data->tgl_bayar,
-                // 'no_bku'    => $data->no_bku,
-                // 'tgl_bku'   => $data->tgl_bku,
 
-                // 'id_transaksi'  => $data->id_transaksi,
                 'status_denda'  => $data->status_denda,
-                // 'status_diskon' => $data->status_diskon,
                 'status_bayar'  => $data->status_bayar
             );
 
@@ -128,7 +121,8 @@ class SKRDController extends Controller
                 'denda'   => $denda,
                 'ntb'     => $ntb,
                 'total_bayar_bjb' => $total_bayar_bjb,
-                'chanel_bayar'    => $chanel_bayar
+                'chanel_bayar'    => $chanel_bayar,
+                'updated_by'      => 'Bank BJB'
             ]);
 
             return response()->json([

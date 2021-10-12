@@ -65,8 +65,9 @@ class CallBackController extends Controller
                         'tgl_bayar'    => $transaction_time,
                         'total_bayar_bjb' => $transaction_amount,
                         'updated_by'      => 'BJB From API Callback',
-                        'ntb'      => $ntb,
-                        'check_ip' => $ip
+                        'chanel_bayar'    => 'BJB Virtual Account',
+                        'ntb'      => $ntb
+                        // 'check_ip' => $ip
                     ]);
                 }
 
