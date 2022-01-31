@@ -12,9 +12,10 @@
  * Github : axxpxmd
  */
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\BJB;
 
 use Illuminate\Http\Request;
+
 use App\Http\Controllers\Controller;
 
 // Models
@@ -22,23 +23,27 @@ use App\Models\TransaksiOPD;
 
 class CallBackController extends Controller
 {
+    /**
+     * Payment with BJB Virtual Account
+     */
     public function callBack(Request $request)
     {
-        $status        = $request->status;
-        $va_number     = $request->va_number;
-        $client_refnum = $request->client_refnum;
-        $transaction_time   = $request->transaction_time;
+        //* Get params
+        $status    = $request->status;
+        $va_number = $request->va_number;
+        $client_refnum    = $request->client_refnum;
+        $transaction_time = $request->transaction_time;
         $transaction_amount = $request->transaction_amount;
 
-        $ip     = $request->ip();
-        $ipBJB  = config('app.ipbjb');
+        $ip    = $request->ip();
+        $ipBJB = config('app.ipbjb');
         $ipBJB2 = config('app.ipbjb2');
         $ipKMNF = config('app.ipkmnf');
 
-        // NTB (encrypt no_bayar)   
+        //* NTB (encrypt no_bayar)   
         $ntb = \md5($client_refnum);
 
-        // Check Status (status must 2)
+        //TODO: Check Status (status must 2)
         if ($status != 2)
             return response()->json([
                 'status'  => 422,
@@ -46,7 +51,7 @@ class CallBackController extends Controller
             ], 422);
 
         try {
-            // Check IP
+            //TODO: Check IP
             if ($ip == $ipBJB || $ip == $ipBJB2 || $ip == $ipKMNF) {
                 $where = [
                     'nomor_va_bjb' => $va_number,
@@ -61,13 +66,12 @@ class CallBackController extends Controller
                     ], 404);
                 } else {
                     $data->update([
-                        'status_bayar' => 1,
-                        'tgl_bayar'    => $transaction_time,
-                        'total_bayar_bjb' => $transaction_amount,
-                        'updated_by'      => 'BJB From API Callback',
+                        'ntb'        => $ntb,
+                        'tgl_bayar'  => $transaction_time,
+                        'updated_by' => 'BJB From API Callback',
+                        'status_bayar'    => 1,
                         'chanel_bayar'    => 'BJB Virtual Account',
-                        'ntb'      => $ntb
-                        // 'check_ip' => $ip
+                        'total_bayar_bjb' => $transaction_amount
                     ]);
                 }
 

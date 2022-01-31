@@ -12,19 +12,21 @@
  * Github : axxpxmd
  */
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\BJB;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Crypt;
+
+use App\Http\Controllers\Controller;
 
 // Models
 use App\Models\TransaksiOPD;
 
-class SKRDController extends Controller
+class InvoiceController extends Controller
 {
     public function invoice($no_bayar)
     {
+        //* Get params
         $no_bayar = $no_bayar;
 
         try {
@@ -37,7 +39,7 @@ class SKRDController extends Controller
                 ], 404);
 
 
-            // Check rincian jenis (kode_rekening, nama_rekening)
+            //* Check rincian jenis (kode_rekening, nama_rekening)
             if ($data->rincian_jenis == null) {
                 $kode_rekening = '-';
                 $nama_rekening = '-';
@@ -88,14 +90,16 @@ class SKRDController extends Controller
     {
         $id = Crypt::decrypt($request->id);
 
+        //* Get params
+        $ntb    = $request->ntb;
+        $denda  = $request->denda;
+        $no_bku = $request->no_bku;
+        $tgl_bku   = $request->tgl_bku;
+        $tgl_bayar = $request->tgl_bayar;
         $status_bayar = $request->status_bayar;
-        $tgl_bayar    = $request->tgl_bayar;
-        $no_bku       = $request->no_bku;
-        $tgl_bku      = $request->tgl_bku;
-        $denda        = $request->denda;
-        $ntb          = $request->ntb;
+        $chanel_bayar = $request->chanel_bayar;
         $total_bayar_bjb = $request->total_bayar_bjb;
-        $chanel_bayar    = $request->chanel_bayar;
+
 
         try {
             $data = TransaksiOPD::where('id', $id)->first();
@@ -107,22 +111,16 @@ class SKRDController extends Controller
                 ], 404);
             }
 
-            if ($denda != null) {
-                $data->update([
-                    'denda' => $denda,
-                ]);
-            }
-
             $data->update([
+                'ntb'    => $ntb,
+                'denda'  => $denda,
+                'no_bku' => $no_bku,
+                'tgl_bku'   => $tgl_bku,
+                'tgl_bayar' => $tgl_bayar,
+                'updated_by'   => 'Bank BJB',
                 'status_bayar' => $status_bayar,
-                'tgl_bayar'    => $tgl_bayar,
-                'no_bku'       => $no_bku,
-                'tgl_bku' => $tgl_bku,
-                'denda'   => $denda,
-                'ntb'     => $ntb,
+                'chanel_bayar' => $chanel_bayar,
                 'total_bayar_bjb' => $total_bayar_bjb,
-                'chanel_bayar'    => $chanel_bayar,
-                'updated_by'      => 'Bank BJB'
             ]);
 
             return response()->json([

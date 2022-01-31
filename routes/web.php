@@ -17,17 +17,22 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-/** Auth */
+//* --------------------- BJB ---------------------- *//
+// Auth
 $router->group(['prefix' => 'auth', 'namespace' => 'Auth'], function () use ($router) {
     $router->post('login', 'AuthController@login');
 });
-
-/** SKRD */
-$router->group(['middleware' => 'auth'], function () use ($router) {
-    $router->get('invoice', 'SKRDController@checkNoBayar');
-    $router->get('invoice/{no_bayar}', 'SKRDController@invoice');
-    $router->put('invoice/update/{id}', 'SKRDController@update');
+// Invoice
+$router->group(['middleware' => 'auth', 'namespace' => 'BJB'], function () use ($router) {
+    $router->get('invoice', 'InvoiceController@checkNoBayar');
+    $router->get('invoice/{no_bayar}', 'InvoiceController@invoice');
+    $router->put('invoice/update/{id}', 'InvoiceController@update');
 });
+// Callback
+$router->post('callback', 'BJB\CallBackController@callBack');
 
-/** CallBack */
-$router->post('callback', 'CallBackController@callBack');
+//* --------------------- Client ------------------- *//
+$router->group(['namespace' => 'Client'], function () use ($router) {
+    $router->get('skrd', 'SKRDController@index');
+    $router->get('skrd/store', 'SKRDController@store');
+});
