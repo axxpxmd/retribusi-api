@@ -17,22 +17,32 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-//* --------------------- BJB ---------------------- *//
-// Auth
+//* Auth
 $router->group(['prefix' => 'auth', 'namespace' => 'Auth'], function () use ($router) {
     $router->post('login', 'AuthController@login');
 });
-// Invoice
+
+//* --------------------- BJB ---------------------- *//
 $router->group(['middleware' => 'auth', 'namespace' => 'BJB'], function () use ($router) {
+    // Invoice
     $router->get('invoice', 'InvoiceController@checkNoBayar');
     $router->get('invoice/{no_bayar}', 'InvoiceController@invoice');
     $router->put('invoice/update/{id}', 'InvoiceController@update');
+
+    // Callback
+    $router->post('callback', 'BJB\CallBackController@callBack');
 });
-// Callback
-$router->post('callback', 'BJB\CallBackController@callBack');
 
 //* --------------------- Client ------------------- *//
 $router->group(['namespace' => 'Client'], function () use ($router) {
+    // SKRD
     $router->get('skrd', 'SKRDController@index');
-    $router->get('skrd/store', 'SKRDController@store');
+    $router->post('skrd', 'SKRDController@store');
+
+    // Utility
+    $router->get('jenis-pendapatan', 'UtilityController@getJenisPendapatan');
+    $router->get('rincian-pendapatan/{jenis_pendapatan_id}', 'UtilityController@getRincianPendapatan');
+    $router->get('penanda-tangan', 'UtilityController@getPenandaTangan');
+    $router->get('kecamatan', 'UtilityController@getKecamatan');
+    $router->get('kelurahan/{kecamatan_id}', 'UtilityController@getKelurahan');
 });

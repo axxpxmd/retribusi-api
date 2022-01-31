@@ -16,6 +16,7 @@ namespace App\Http\Controllers\Client;
 
 use Illuminate\Http\Request;
 
+use App\Http\Services\VABJB;
 use App\Http\Controllers\Controller;
 
 // Models
@@ -24,6 +25,11 @@ use App\Models\TransaksiOPD;
 
 class SKRDController extends Controller
 {
+    public function __construct(VABJB $vabjb)
+    {
+        $this->vabjb = $vabjb;
+    }
+
     public function index(Request $request)
     {
         $api_key = $request->header('API-Key');
