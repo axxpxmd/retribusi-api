@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-
-
 class TtdOPD extends Model
 {
     protected $table   = 'tr_ttd_opds';

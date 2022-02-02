@@ -118,6 +118,7 @@ class UtilityController extends Controller
             $penanda_tangans = TtdOPD::where('id_opd', $opd_id)->get();
             foreach ($penanda_tangans as $key => $i) {
                 $datas[$key] = [
+                    'id' => $i->id,
                     'nama' => $i->userDetail->full_name,
                     'nip' => $i->userDetail->nip
                 ];

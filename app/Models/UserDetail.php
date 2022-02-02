@@ -20,4 +20,9 @@ class UserDetail extends Model
 {
     protected $table = 'tmpenggunas';
     protected $guarded = [];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

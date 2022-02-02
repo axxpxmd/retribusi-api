@@ -14,4 +14,7 @@ return [
     'ip_api_bjb' => env('IP_API_BJB'),
     'key_bjb' => env('KEY_BJB'),
     'client_id_bjb' => env('CLIENT_ID_BJB'),
+
+    'timezone' => 'UTC',
+    'timezone' => 'Asia/Jakarta',
 ];
