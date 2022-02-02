@@ -30,7 +30,7 @@ $router->group(['middleware' => 'auth', 'namespace' => 'BJB'], function () use (
     $router->put('invoice/update/{id}', 'InvoiceController@update');
 
     // Callback
-    $router->post('callback', 'BJB\CallBackController@callBack');
+    $router->post('callback', 'CallBackController@callBack');
 });
 
 //* --------------------- Client ------------------- *//
@@ -38,6 +38,10 @@ $router->group(['namespace' => 'Client'], function () use ($router) {
     // SKRD
     $router->get('skrd', 'SKRDController@index');
     $router->post('skrd', 'SKRDController@store');
+    $router->get('skrd/{id}', 'SKRDController@show');
+
+    // Callback VA
+    $router->post('callback-bjb/{id}', 'CallbackVAController@callbackVABJB');
 
     // Utility
     $router->get('jenis-pendapatan', 'UtilityController@getJenisPendapatan');

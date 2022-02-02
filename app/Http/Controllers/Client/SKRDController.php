@@ -23,12 +23,13 @@ use Illuminate\Http\Request;
 use App\Http\Services\VABJB;
 use App\Libraries\GenerateNumber;
 use App\Http\Controllers\Controller;
-use App\Models\DataWP;
-use App\Models\RincianJenisPendapatan;
+
 // Models
+use App\Models\TtdOPD;
+use App\Models\DataWP;
 use App\Models\UserDetail;
 use App\Models\TransaksiOPD;
-use App\Models\TtdOPD;
+use App\Models\RincianJenisPendapatan;
 
 class SKRDController extends Controller
 {
@@ -40,7 +41,8 @@ class SKRDController extends Controller
     public function index(Request $request)
     {
         $api_key = $request->header('API-Key');
-        if (!$api_key) {
+        $user    = UserDetail::where('api_key', $api_key)->first();
+        if (!$api_key || !$user) {
             return response()->json([
                 'status'  => 401,
                 'message' => 'Invalid API Key!'
@@ -48,17 +50,9 @@ class SKRDController extends Controller
         }
 
         try {
-            $user = UserDetail::where('api_key', $api_key)->first();
-            if (!$user) {
-                return response()->json([
-                    'status'  => 403,
-                    'message' => 'User tidak ditemukan!'
-                ], 403);
-            }
-
             //* Params
-            $end   = $request->end;
-            $start = $request->start;
+            $end    = $request->end;
+            $start  = $request->start;
             $length = $request->length;
             $opd_id = $user->opd_id;
             $no_skrd    = $request->no_skrd;
@@ -93,7 +87,8 @@ class SKRDController extends Controller
     public function store(Request $request)
     {
         $api_key = $request->header('API-Key');
-        if (!$api_key) {
+        $user    = UserDetail::where('api_key', $api_key)->first();
+        if (!$api_key || !$user) {
             return response()->json([
                 'status'  => 401,
                 'message' => 'Invalid API Key!'
@@ -124,14 +119,6 @@ class SKRDController extends Controller
          */
 
         try {
-            $user = UserDetail::where('api_key', $api_key)->first();
-            if (!$user) {
-                return response()->json([
-                    'status'  => 403,
-                    'message' => 'User tidak ditemukan!'
-                ], 403);
-            }
-
             //* Tahap 1
             $jenisGenerate = 'no_skrd';
             $no_skrd = GenerateNumber::generate($request->id_opd, $request->id_jenis_pendapatan, $jenisGenerate);
@@ -267,6 +254,32 @@ class SKRDController extends Controller
             return response()->json([
                 'status'  => 200,
                 'message' => 'Succesfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function show(Request $request, $id)
+    {
+        $api_key = $request->header('API-Key');
+        $user    = UserDetail::where('api_key', $api_key)->first();
+        if (!$api_key || !$user) {
+            return response()->json([
+                'status'  => 401,
+                'message' => 'Invalid API Key!'
+            ], 401);
+        }
+
+        try {
+            $data = TransaksiOPD::find($id);
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Succesfully',
+                'datas'   => $data
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
