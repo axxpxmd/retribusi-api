@@ -224,7 +224,8 @@ class SKRDController extends Controller
                 'tgl_skrd_awal'    => $request->tgl_skrd_awal,
                 'tgl_skrd_akhir'   => $tgl_skrd_akhir,
                 'no_bayar'         => $no_bayar,
-                'created_by'       => $request->created_by . ' | ' . 'API Retribusi'
+                'created_by'       => $request->created_by . ' | ' . 'API Retribusi',
+                'c_status'         => 1
             ];
             $skrd = TransaksiOPD::create($data);
             $skrdResponse = [
