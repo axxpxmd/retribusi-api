@@ -48,6 +48,11 @@ class TransaksiOPD extends Model
         return $this->belongsTo(Kelurahan::class, 'kelurahan_id');
     }
 
+    public function userApi()
+    {
+        return $this->belongsTo(UserDetail::class, 'user_api');
+    }
+
     //* ---------------------- QUERY ---------------------- *//
 
     // query SKRD

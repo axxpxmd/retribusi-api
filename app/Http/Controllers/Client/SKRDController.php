@@ -89,13 +89,13 @@ class SKRDController extends Controller
     {
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
-        $id_opd  = $user->opd_id;
         if (!$api_key || !$user) {
             return response()->json([
                 'status'  => 401,
                 'message' => 'Invalid API Key!'
             ], 401);
         }
+        $id_opd  = $user->opd_id;
 
         $this->validate($request, [
             'tgl_ttd' => 'required',
@@ -225,7 +225,8 @@ class SKRDController extends Controller
                 'tgl_skrd_akhir'   => $tgl_skrd_akhir,
                 'no_bayar'         => $no_bayar,
                 'created_by'       => $request->created_by . ' | ' . 'API Retribusi',
-                'c_status'         => 1
+                'c_status'         => 1,
+                'user_api'         => $user->id
             ];
             $skrd = TransaksiOPD::create($data);
             $skrdResponse = [

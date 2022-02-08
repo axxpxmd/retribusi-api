@@ -15,6 +15,7 @@
 namespace App\Http\Controllers\BJB;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 use App\Http\Controllers\Controller;
 
@@ -62,7 +63,7 @@ class CallBackController extends Controller
                 if ($data == null) {
                     return response()->json([
                         'status'  => 404,
-                        'message' => 'Error, D ata nomor bayar tidak ditemukan.',
+                        'message' => 'Error, Data nomor bayar tidak ditemukan.',
                     ], 404);
                 } else {
                     $data->update([
@@ -74,6 +75,16 @@ class CallBackController extends Controller
                         'total_bayar_bjb' => $transaction_amount
                     ]);
                 }
+
+                // $url = 'http://' . $data->userApi->url_callback;
+                // $reqBody = [
+                //     'nomor_va_bjb' => $va_number,
+                //     'no_bayar'     => $client_refnum,
+                //     'waktu_bayar'  => $transaction_time,
+                //     'jumlah_bayar' => $transaction_amount
+                // ];
+                // Http::get($url, $reqBody);
+
 
                 return response()->json([
                     'status'  => 200,
