@@ -43,6 +43,11 @@ class CallbackVAController extends Controller
 
         try {
             $data = TransaksiOPD::find($id);
+            if (!$data)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'Data SKRD tidak ditemukan!.'
+                ], 404);
 
             $va_number = (int) $data->nomor_va_bjb;
             $status_bayar = $data->status_bayar;
@@ -98,7 +103,7 @@ class CallbackVAController extends Controller
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Succesfully'
+                'message' => 'Success'
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([

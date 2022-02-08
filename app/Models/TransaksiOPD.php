@@ -25,7 +25,7 @@ class TransaksiOPD extends Model
 
     public function opd()
     {
-        return $this->belongsTo(OPD::class, 'id_opd');
+        return $this->belongsTo(OPD::class, 'id_opd')->select('id', 'kode', 'n_opd', 'initial', 'alamat');
     }
 
     public function jenis_pendapatan()
@@ -35,7 +35,17 @@ class TransaksiOPD extends Model
 
     public function rincian_jenis()
     {
-        return $this->belongsTo(RincianJenisPendapatan::class, 'id_rincian_jenis_pendapatan');
+        return $this->belongsTo(RincianJenisPendapatan::class, 'id_rincian_jenis_pendapatan')->select('id', 'kd_jenis', 'rincian_pendapatan', 'nmr_rekening', 'nmr_rekening_denda');
+    }
+
+    public function kecamatan()
+    {
+        return $this->belongsTo(Kecamatan::class, 'kecamatan_id');
+    }
+
+    public function kelurahan()
+    {
+        return $this->belongsTo(Kelurahan::class, 'kelurahan_id');
     }
 
     //* ---------------------- QUERY ---------------------- *//
@@ -46,7 +56,15 @@ class TransaksiOPD extends Model
         $now  = Carbon::now();
         $date = $now->format('Y-m-d');
 
-        $data = TransaksiOPD::with('opd', 'jenis_pendapatan')->where('status_bayar', 0)->where('tgl_skrd_akhir', '>=', $date)->orderBy('id', 'DESC');
+        $select = [
+            'tmtransaksi_opd.id as id', 'no_skrd', 'no_bayar', 'nm_wajib_pajak', 'tgl_skrd_awal', 'tgl_skrd_akhir', 'jumlah_bayar', 'status_ttd', 'jenis_pendapatan'
+        ];
+
+        $data = TransaksiOPD::select($select)
+            ->join('tmjenis_pendapatan', 'tmjenis_pendapatan.id', '=', 'tmtransaksi_opd.id_jenis_pendapatan')
+            ->where('status_bayar', 0)
+            ->where('tgl_skrd_akhir', '>=', $date)
+            ->orderBy('id', 'DESC');
 
         if ($opd_id != 0) {
             $data->where('id_opd', $opd_id);
@@ -68,6 +86,10 @@ class TransaksiOPD extends Model
             }
         }
 
-        return $data->get()->take($length);
+        if ($length != null) {
+            return $data->simplePaginate($length);
+        } else {
+            return $data->get();
+        }
     }
 }

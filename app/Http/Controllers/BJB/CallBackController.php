@@ -62,7 +62,7 @@ class CallBackController extends Controller
                 if ($data == null) {
                     return response()->json([
                         'status'  => 404,
-                        'message' => 'Error, Data nomor bayar tidak ditemukan.',
+                        'message' => 'Error, D ata nomor bayar tidak ditemukan.',
                     ], 404);
                 } else {
                     $data->update([
