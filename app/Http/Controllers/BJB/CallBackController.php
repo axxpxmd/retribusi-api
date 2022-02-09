@@ -15,10 +15,12 @@
 namespace App\Http\Controllers\BJB;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\ExampleJob;
+
+// Queque
+use App\Jobs\CallbackJob;
+
 // Models
 use App\Models\TransaksiOPD;
 
@@ -78,15 +80,15 @@ class CallBackController extends Controller
 
                 if ($data->userApi != null) {
                     $url = $data->userApi->url_callback;
-                    $url = 'http://localhost:9000/test-callback';
                     $reqBody = [
                         'nomor_va_bjb' => $va_number,
                         'no_bayar'     => $client_refnum,
                         'waktu_bayar'  => $transaction_time,
                         'jumlah_bayar' => $transaction_amount,
-                        'status_bayar' => 1
+                        'status_bayar' => 1,
+                        'channel_bayar' => 'BJB Virtual Account'
                     ];
-                    dispatch(new ExampleJob($reqBody, $url));
+                    dispatch(new CallbackJob($reqBody, $url));
                 }
 
                 return response()->json([
