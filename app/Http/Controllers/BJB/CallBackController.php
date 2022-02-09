@@ -77,14 +77,8 @@ class CallBackController extends Controller
                 }
 
                 // $url = 'http://' . $data->userApi->url_callback;
-                // $url = 'http://localhost:9000/test-callback';
-                // $reqBody = [
-                //     'nomor_va_bjb' => $va_number,
-                //     'no_bayar'     => $client_refnum,
-                //     'waktu_bayar'  => $transaction_time,
-                //     'jumlah_bayar' => $transaction_amount
-                // ];
-                // Http::get($url, $reqBody);
+                $url = 'http://localhost:9000/test-callback';
+                $this->sendCallback($url, $va_number, $client_refnum, $transaction_time, $transaction_amount);
 
                 return response()->json([
                     'status'  => 200,
@@ -101,5 +95,17 @@ class CallBackController extends Controller
                 'message' => $th->getMessage(),
             ], 500);
         }
+    }
+
+    public static function sendCallback($url, $va_number, $client_refnum, $transaction_time, $transaction_amount)
+    {
+        $reqBody = [
+            'nomor_va_bjb' => $va_number,
+            'no_bayar'     => $client_refnum,
+            'waktu_bayar'  => $transaction_time,
+            'jumlah_bayar' => $transaction_amount,
+            'status_bayar' => 1
+        ];
+        Http::get($url, $reqBody);
     }
 }
