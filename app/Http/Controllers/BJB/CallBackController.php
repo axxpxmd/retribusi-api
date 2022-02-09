@@ -76,9 +76,10 @@ class CallBackController extends Controller
                     ]);
                 }
 
-                // $url = 'http://' . $data->userApi->url_callback;
-                // $url = 'http://localhost:9000/test-callback';
-                // $this->sendCallback($url, $va_number, $client_refnum, $transaction_time, $transaction_amount);
+                if ($data->userApi != null) {
+                    $url = 'http://' . $data->userApi->url_callback;
+                    $this->sendCallback($url, $va_number, $client_refnum, $transaction_time, $transaction_amount);
+                }
 
                 return response()->json([
                     'status'  => 200,
