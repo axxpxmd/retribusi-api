@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\Crypt;
 
 use App\Http\Controllers\Controller;
 
+// Queque
+use App\Jobs\CallbackJob;
+
 // Models
 use App\Models\TransaksiOPD;
 
@@ -97,9 +100,7 @@ class InvoiceController extends Controller
         $tgl_bku   = $request->tgl_bku;
         $tgl_bayar = $request->tgl_bayar;
         $status_bayar = $request->status_bayar;
-        $chanel_bayar = $request->chanel_bayar;
         $total_bayar_bjb = $request->total_bayar_bjb;
-
 
         try {
             $data = TransaksiOPD::where('id', $id)->first();
@@ -119,9 +120,22 @@ class InvoiceController extends Controller
                 'tgl_bayar' => $tgl_bayar,
                 'updated_by'   => 'Bank BJB',
                 'status_bayar' => $status_bayar,
-                'chanel_bayar' => $chanel_bayar,
+                'chanel_bayar' => 'ATM BJB',
                 'total_bayar_bjb' => $total_bayar_bjb,
             ]);
+
+            if ($data->userApi != null) {
+                $url = $data->userApi->url_callback;
+                $reqBody = [
+                    'nomor_va_bjb' => $data->nomor_va_bjb,
+                    'no_bayar'     => $data->no_bayar,
+                    'waktu_bayar'  => $tgl_bayar,
+                    'jumlah_bayar' => $total_bayar_bjb,
+                    'status_bayar' => 1,
+                    'channel_bayar' => 'ATM BJB'
+                ];
+                dispatch(new CallbackJob($reqBody, $url));
+            }
 
             return response()->json([
                 'status'  => 200,
