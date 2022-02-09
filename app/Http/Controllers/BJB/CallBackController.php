@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 use App\Http\Controllers\Controller;
-
+use App\Jobs\ExampleJob;
 // Models
 use App\Models\TransaksiOPD;
 
@@ -53,7 +53,7 @@ class CallBackController extends Controller
 
         try {
             //TODO: Check IP
-            if ($ip == $ipBJB || $ip == $ipBJB2 || $ip == $ipKMNF) {
+            if ($ip != $ipBJB || $ip == $ipBJB2 || $ip == $ipKMNF) {
                 $where = [
                     'nomor_va_bjb' => $va_number,
                     'no_bayar' => $client_refnum
@@ -77,8 +77,16 @@ class CallBackController extends Controller
                 }
 
                 if ($data->userApi != null) {
-                    $url = 'http://' . $data->userApi->url_callback;
-                    $this->sendCallback($url, $va_number, $client_refnum, $transaction_time, $transaction_amount);
+                    $url = $data->userApi->url_callback;
+                    $url = 'http://localhost:9000/test-callback';
+                    $reqBody = [
+                        'nomor_va_bjb' => $va_number,
+                        'no_bayar'     => $client_refnum,
+                        'waktu_bayar'  => $transaction_time,
+                        'jumlah_bayar' => $transaction_amount,
+                        'status_bayar' => 1
+                    ];
+                    dispatch(new ExampleJob($reqBody, $url));
                 }
 
                 return response()->json([
@@ -96,17 +104,5 @@ class CallBackController extends Controller
                 'message' => $th->getMessage(),
             ], 500);
         }
-    }
-
-    public static function sendCallback($url, $va_number, $client_refnum, $transaction_time, $transaction_amount)
-    {
-        $reqBody = [
-            'nomor_va_bjb' => $va_number,
-            'no_bayar'     => $client_refnum,
-            'waktu_bayar'  => $transaction_time,
-            'jumlah_bayar' => $transaction_amount,
-            'status_bayar' => 1
-        ];
-        Http::get($url, $reqBody);
     }
 }
