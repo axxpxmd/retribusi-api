@@ -39,6 +39,7 @@ $router->group(['namespace' => 'Client'], function () use ($router) {
     $router->get('skrd', 'SKRDController@index');
     $router->post('skrd', 'SKRDController@store');
     $router->get('skrd/{id}', 'SKRDController@show');
+    $router->post('skrd/{id}', 'SKRDController@update');
 
     // Callback VA
     $router->post('inquiry-bjb/{id}', 'CallbackVAController@callbackVABJB');

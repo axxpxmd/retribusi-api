@@ -349,4 +349,9 @@ class SKRDController extends Controller
             ], 500);
         }
     }
+
+    public function update(Request $request, $id)
+    {
+        // 
+    }
 }
