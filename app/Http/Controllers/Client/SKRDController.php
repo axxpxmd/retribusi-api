@@ -305,7 +305,7 @@ class SKRDController extends Controller
             if ($user->opd_id != $data->id_opd) {
                 return response()->json([
                     'status'  => 403,
-                    'message' => 'Tidak bisa akses data dari OPD lain.'
+                    'message' => 'Akses dibatasi, data ini dari OPD lain.'
                 ], 403);
             }
 
@@ -352,6 +352,15 @@ class SKRDController extends Controller
 
     public function update(Request $request, $id)
     {
-        // 
+        $data = TransaksiOPD::find($id);
+        dd($data);
+
+        try {
+            //code...
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
     }
 }
