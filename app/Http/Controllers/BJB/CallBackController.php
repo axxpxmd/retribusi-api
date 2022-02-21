@@ -14,6 +14,7 @@
 
 namespace App\Http\Controllers\BJB;
 
+use Log;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
@@ -45,6 +46,16 @@ class CallBackController extends Controller
 
         //* NTB (encrypt no_bayar)   
         $ntb = \md5($client_refnum);
+
+        $data = [
+            'status' => $status,
+            'va_number' => $va_number,
+            'client_refnum' => $client_refnum,
+            'transaction_time' => $transaction_time,
+            'transaction_amount' => $transaction_amount
+        ];
+
+        Log::info($data);
 
         //TODO: Check Status (status must 2)
         if ($status != 2)
