@@ -55,8 +55,6 @@ class CallBackController extends Controller
             'transaction_amount' => $transaction_amount
         ];
 
-        Log::info($dataLog);
-
         //TODO: Check Status (status must 2)
         if ($status != 2)
             return response()->json([
