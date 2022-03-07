@@ -101,9 +101,9 @@ class CallBackController extends Controller
             }
 
             return response()->json([
-                'status'  => 200,
-                'message' => 'Success',
-            ], 200);
+                'response_code'  => 0000,
+                'response_message' => 'Success',
+            ]);
             // } else {
             //     return response()->json([
             //         'status'  => 401,
