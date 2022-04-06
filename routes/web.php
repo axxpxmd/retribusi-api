@@ -28,10 +28,10 @@ $router->group(['middleware' => 'auth', 'namespace' => 'BJB'], function () use (
     $router->get('invoice', 'InvoiceController@checkNoBayar');
     $router->get('invoice/{no_bayar}', 'InvoiceController@invoice');
     $router->put('invoice/update/{id}', 'InvoiceController@update');
-
-    // Callback
-    $router->post('callback', 'CallBackController@callBack');
 });
+
+// Callback
+$router->post('callback', 'CallBackController@callBack');
 
 //* --------------------- Client ------------------- *//
 $router->group(['namespace' => 'Client'], function () use ($router) {
