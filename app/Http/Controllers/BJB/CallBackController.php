@@ -55,6 +55,8 @@ class CallBackController extends Controller
             'transaction_amount' => $transaction_amount
         ];
 
+        Log::info($dataLog);
+
         //TODO: Check Status (status must 2)
         if ($status != 2)
             return response()->json([
@@ -64,52 +66,52 @@ class CallBackController extends Controller
 
         try {
             //TODO: Check IP
-            // if ($ip == $ipBJB || $ip == $ipBJB2 || $ip == $ipKMNF) {
-            $where = [
-                'nomor_va_bjb' => $va_number,
-                'no_bayar' => $client_refnum
-            ];
-            $data = TransaksiOPD::where($where)->first();
-
-            if ($data == null) {
-                return response()->json([
-                    'status'  => 404,
-                    'message' => 'Error, Data nomor bayar tidak ditemukan.',
-                ], 404);
-            } else {
-                $data->update([
-                    'ntb'        => $ntb,
-                    'tgl_bayar'  => $transaction_time,
-                    'updated_by' => 'BJB From API Callback',
-                    'status_bayar'    => 1,
-                    'chanel_bayar'    => 'BJB Virtual Account',
-                    'total_bayar_bjb' => $transaction_amount
-                ]);
-            }
-
-            if ($data->userApi != null) {
-                $url = $data->userApi->url_callback;
-                $reqBody = [
+            if ($ip == $ipBJB || $ip == $ipBJB2 || $ip != $ipKMNF) {
+                $where = [
                     'nomor_va_bjb' => $va_number,
-                    'no_bayar'     => $client_refnum,
-                    'waktu_bayar'  => $transaction_time,
-                    'jumlah_bayar' => $transaction_amount,
-                    'status_bayar' => 1,
-                    'channel_bayar' => 'BJB Virtual Account'
+                    'no_bayar' => $client_refnum
                 ];
-                dispatch(new CallbackJob($reqBody, $url));
-            }
+                $data = TransaksiOPD::where($where)->first();
 
-            return response()->json([
-                'response_code'  => 0000,
-                'response_message' => 'Success',
-            ]);
-            // } else {
-            //     return response()->json([
-            //         'status'  => 401,
-            //         'message' => 'Error, Akses ditolak: ' . $ip,
-            //     ], 401);
-            // }
+                if ($data == null) {
+                    return response()->json([
+                        'status'  => 404,
+                        'message' => 'Error, Data nomor bayar tidak ditemukan.',
+                    ], 404);
+                } else {
+                    $data->update([
+                        'ntb'        => $ntb,
+                        'tgl_bayar'  => $transaction_time,
+                        'updated_by' => 'BJB From API Callback',
+                        'status_bayar'    => 1,
+                        'chanel_bayar'    => 'BJB Virtual Account',
+                        'total_bayar_bjb' => $transaction_amount
+                    ]);
+                }
+
+                if ($data->userApi != null) {
+                    $url = $data->userApi->url_callback;
+                    $reqBody = [
+                        'nomor_va_bjb' => $va_number,
+                        'no_bayar'     => $client_refnum,
+                        'waktu_bayar'  => $transaction_time,
+                        'jumlah_bayar' => $transaction_amount,
+                        'status_bayar' => 1,
+                        'channel_bayar' => 'BJB Virtual Account'
+                    ];
+                    dispatch(new CallbackJob($reqBody, $url));
+                }
+
+                return response()->json([
+                    'response_code'  => 0000,
+                    'response_message' => 'Success',
+                ]);
+            } else {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => 'Error, Akses ditolak: ' . $ip,
+                ], 401);
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => $th->getMessage(),
