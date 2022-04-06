@@ -31,7 +31,7 @@ $router->group(['middleware' => 'auth', 'namespace' => 'BJB'], function () use (
 });
 
 // Callback
-$router->post('callback', 'CallBackController@callBack');
+$router->post('callback', 'BJB\CallBackController@callBack');
 
 //* --------------------- Client ------------------- *//
 $router->group(['namespace' => 'Client'], function () use ($router) {
