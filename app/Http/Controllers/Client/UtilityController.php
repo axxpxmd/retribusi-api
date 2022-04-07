@@ -40,28 +40,28 @@ class UtilityController extends Controller
             ], 401);
         }
 
-        try {
-            $opd_id = $user->opd_id;
-            $jenis_pendapatans = OPDJenisPendapatan::getJenisPendapatanByOpd($opd_id);
+        // try {
+        $opd_id = $user->opd_id;
+        $jenis_pendapatans = OPDJenisPendapatan::getJenisPendapatanByOpd($opd_id);
 
-            $datas = [];
-            foreach ($jenis_pendapatans as $key => $i) {
-                $datas[$key] = [
-                    'id' => $i->id,
-                    'jenis_pendapatan' => $i->jenis_pendapatan
-                ];
-            }
-
-            return response()->json([
-                'status'  => 200,
-                'message' => 'Success',
-                'data'    => $datas
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage(),
-            ], 500);
+        $datas = [];
+        foreach ($jenis_pendapatans as $key => $i) {
+            $datas[$key] = [
+                'id' => $i->id,
+                'jenis_pendapatan' => $i->jenis_pendapatan
+            ];
         }
+
+        return response()->json([
+            'status'  => 200,
+            'message' => 'Success',
+            'data'    => $datas
+        ], 200);
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'message' => $th->getMessage(),
+        //     ], 500);
+        // }
     }
 
     public function getRincianPendapatan(Request $request, $jenis_pendapatan_id)

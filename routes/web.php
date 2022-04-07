@@ -30,8 +30,10 @@ $router->group(['middleware' => 'auth', 'namespace' => 'BJB'], function () use (
     $router->put('invoice/update/{id}', 'InvoiceController@update');
 });
 
-// Callback
+// Callback VA
 $router->post('callback', 'BJB\CallBackController@callBack');
+
+$router->post('callback-qris', 'BJB\CallBackController@callbackQRIS');
 
 //* --------------------- Client ------------------- *//
 $router->group(['namespace' => 'Client'], function () use ($router) {
