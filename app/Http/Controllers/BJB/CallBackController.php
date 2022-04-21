@@ -71,11 +71,11 @@ class CallBackController extends Controller
                     ], 404);
                 } else {
                     $data->update([
-                        'ntb'        => $ntb,
+                        'ntb' => $ntb,
                         'tgl_bayar'  => $transaction_time,
                         'updated_by' => 'BJB From API Callback',
-                        'status_bayar'    => 1,
-                        'chanel_bayar'    => 'BJB Virtual Account',
+                        'status_bayar' => 1,
+                        'chanel_bayar' => 'BJB Virtual Account',
                         'total_bayar_bjb' => $transaction_amount
                     ]);
                 }
@@ -110,6 +110,9 @@ class CallBackController extends Controller
         }
     }
 
+    /**
+     * Payment with BJB QRIS
+     */
     public function callbackQRIS(Request $request)
     {
         $time = Carbon::now();
@@ -121,56 +124,42 @@ class CallBackController extends Controller
         $customerName = $request->customerName;
         $InvoiceNumber = $request->InvoiceNumber;
 
-        $transcationStatus = $request->transcationStatus;
-        $transcationReference = $request->transcationReference;
-        $merchantBalance = $request->merchantBalance;
-        $merchantName = $request->merchantName;
-        $merchantMsisdn = $request->merchantMsisdn;
-        $merchantEmail = $request->merchantEmail;
-        $merchantMpan = $request->merchantMpan;
-
-        //TODO: Check Status (status must 2)
+        //TODO: Check type
         if ($type != 'TRANSACTION')
             return response()->json([
                 'status'  => 422,
                 'message' => 'type harus berisi TRANSACTION.',
             ], 422);
 
-        try {
-            $data = TransaksiOPD::where('invoice_id', $InvoiceNumber)->first();
+        $data = TransaksiOPD::where('invoice_id', $InvoiceNumber)->first();
 
-            if ($data == null)
-                return response()->json([
-                    'status'  => 404,
-                    'message' => 'Error, Nomor invoice tidak ditemukan.',
-                ], 404);
-
-            //* NTB (encrypt no_bayar)   
-            $ntb = \md5($data->no_bayar);
-
-            $data->update([
-                'ntb'        => $ntb,
-                'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transcationDate)->format('Y-m-d H:i:s'),
-                'updated_by' => 'Pembayaran QRIS',
-                'status_bayar'    => 1,
-                'chanel_bayar'    => $customerName,
-                'total_bayar_bjb' => $transcationAmount
-            ]);
-
-            $status = [
-                'code' => 200,
-                'description' => 'OK',
-                'datetime' => $time->format('Y-m-d') . 'T' . $time->format('H:i:s')
-            ];
-
+        if ($data == null)
             return response()->json([
-                'metadata'  => null,
-                'status' => $status,
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage(),
-            ], 500);
-        }
+                'status'  => 404,
+                'message' => 'Error, Nomor invoice tidak ditemukan.',
+            ], 404);
+
+        //* NTB (encrypt no_bayar)   
+        $ntb = \md5($data->no_bayar);
+
+        $data->update([
+            'ntbdd' => $ntb,
+            'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transcationDate)->format('Y-m-d H:i:s'),
+            'updated_by' => 'Pembayaran QRIS',
+            'status_bayar' => 1,
+            'chanel_bayar' => $customerName,
+            'total_bayar_bjb' => $transcationAmount
+        ]);
+
+        $status = [
+            'code' => 200,
+            'description' => 'OK',
+            'datetime' => $time->format('Y-m-d') . 'T' . $time->format('H:i:s')
+        ];
+
+        return response()->json([
+            'metadata'  => null,
+            'status' => $status,
+        ]);
     }
 }
