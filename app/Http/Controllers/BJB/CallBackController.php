@@ -143,7 +143,7 @@ class CallBackController extends Controller
         $ntb = \md5($data->no_bayar);
 
         $data->update([
-            'ntbdd' => $ntb,
+            'ntb' => $ntb,
             'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transcationDate)->format('Y-m-d H:i:s'),
             'updated_by' => 'Pembayaran QRIS',
             'status_bayar' => 1,
