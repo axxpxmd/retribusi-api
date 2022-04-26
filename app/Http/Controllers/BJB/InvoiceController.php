@@ -16,6 +16,7 @@ namespace App\Http\Controllers\BJB;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 use App\Http\Controllers\Controller;
 
@@ -91,7 +92,14 @@ class InvoiceController extends Controller
 
     public function update(Request $request, $id)
     {
-        $id = Crypt::decrypt($request->id);
+        try {
+            $id = Crypt::decrypt($request->id);
+        } catch (DecryptException $e) {
+            return response([
+                'status' => 500,
+                'message' => 'ID tidak valid.'
+            ]);
+        }
 
         //* Get params
         $ntb    = $request->ntb;
