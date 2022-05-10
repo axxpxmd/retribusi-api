@@ -15,6 +15,8 @@
 namespace App\Http\Controllers\BJB;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 use App\Http\Controllers\Controller;
 
@@ -23,7 +25,6 @@ use App\Jobs\CallbackJob;
 
 // Models
 use App\Models\TransaksiOPD;
-use Illuminate\Support\Carbon;
 
 class CallBackController extends Controller
 {
@@ -119,9 +120,12 @@ class CallBackController extends Controller
         //* Get Params
         $type = $request->type;
         $transcationDate = $request->transcationDate;
-        $transcationAmount = $request->transcationAmount;
+        $transcationAmount = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transcationAmount);
         $customerName = $request->customerName;
         $InvoiceNumber = $request->InvoiceNumber;
+
+        //TODO: LOG
+        LOG::channel('qris')->info('invoiceID:' . $InvoiceNumber . ' | ' . 'type:' . $type . ' | ' . 'transaction date:' . $transcationDate . ' | ' . 'transaction amount:' . $transcationAmount . ' | ' . 'customer name:' . $customerName);
 
         //TODO: Check type
         if ($type != 'TRANSACTION')
