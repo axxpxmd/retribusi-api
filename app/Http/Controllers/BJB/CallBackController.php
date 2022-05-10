@@ -60,7 +60,7 @@ class CallBackController extends Controller
 
         try {
             //TODO: Check IP
-            if ($ip == $ipBJB || $ip == $ipBJB2 || $ip != $ipKMNF) {
+            if ($ip == $ipBJB || $ip != $ipBJB2 || $ip != $ipKMNF) {
                 $where = [
                     'nomor_va_bjb' => $va_number,
                     'no_bayar' => $client_refnum
