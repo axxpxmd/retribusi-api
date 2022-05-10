@@ -15,6 +15,7 @@
 namespace App\Http\Controllers\BJB;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
 
@@ -78,6 +79,9 @@ class InvoiceController extends Controller
                 'status_bayar'  => $data->status_bayar
             );
 
+            //TODO: LOG
+            LOG::channel('atm')->info('Menampilkan SKRD ', $data);
+
             return response()->json([
                 'status'  => 200,
                 'message' => 'Success',
@@ -109,6 +113,9 @@ class InvoiceController extends Controller
         $tgl_bayar = $request->tgl_bayar;
         $status_bayar = $request->status_bayar;
         $total_bayar_bjb = $request->total_bayar_bjb;
+
+        //TODO: LOG
+        LOG::channel('atm')->info('Update Data | ' . 'ntb:' . $ntb . ' | ' . 'denda:' . $denda . ' | ' . 'no_bku:' . $no_bku . ' | ' . 'tgl_bku:' . $tgl_bku . ' | ' . 'tgl_bayar:' . $tgl_bayar . ' | ' . 'status_bayar:' . $status_bayar . ' | ' . 'total_bayar_bjb:' . $total_bayar_bjb);
 
         try {
             $data = TransaksiOPD::where('id', $id)->first();
