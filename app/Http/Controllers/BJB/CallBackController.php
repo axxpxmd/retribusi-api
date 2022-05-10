@@ -124,8 +124,8 @@ class CallBackController extends Controller
         $customerName = $request->customerName;
         $InvoiceNumber = $request->InvoiceNumber;
 
-        //TODO: LOG
-        LOG::channel('qris')->info('invoiceID:' . $InvoiceNumber . ' | ' . 'type:' . $type . ' | ' . 'transaction date:' . $transcationDate . ' | ' . 'transaction amount:' . $transcationAmount . ' | ' . 'customer name:' . $customerName);
+        // //TODO: LOG
+        // LOG::channel('qris')->info('invoiceID:' . $InvoiceNumber . ' | ' . 'type:' . $type . ' | ' . 'transaction date:' . $transcationDate . ' | ' . 'transaction amount:' . $transcationAmount . ' | ' . 'customer name:' . $customerName);
 
         //TODO: Check type
         if ($type != 'TRANSACTION')
