@@ -40,6 +40,9 @@ class CallBackController extends Controller
         $transaction_time = $request->transaction_time;
         $transaction_amount = $request->transaction_amount;
 
+        //TODO: LOG
+        LOG::channel('va')->info('status:' . $status . ' | ' . 'va number:' . $va_number . ' | ' . 'client refnum:' . $client_refnum . ' | ' . 'transaction time:' . $transaction_time . ' | ' . 'transaction amount:' . $transaction_amount);
+
         $ip    = $request->ip();
         $ipBJB = config('app.ipbjb');
         $ipBJB2 = config('app.ipbjb2');
@@ -64,21 +67,29 @@ class CallBackController extends Controller
                 ];
                 $data = TransaksiOPD::where($where)->first();
 
-                if ($data == null) {
+                //* Check Data
+                if ($data == null)
                     return response()->json([
                         'status'  => 404,
                         'message' => 'Error, Data nomor bayar tidak ditemukan.',
                     ], 404);
-                } else {
-                    $data->update([
-                        'ntb' => $ntb,
-                        'tgl_bayar'  => $transaction_time,
-                        'updated_by' => 'BJB From API Callback',
-                        'status_bayar' => 1,
-                        'chanel_bayar' => 'BJB Virtual Account',
-                        'total_bayar_bjb' => $transaction_amount
-                    ]);
+
+                //* Check Amount
+                if ($data->jumlah_bayar != $transaction_amount) {
+                    return response()->json([
+                        'status'  => 403,
+                        'message' => 'Error, nominal bayar tidak sesuai.',
+                    ], 403);
                 }
+
+                $data->update([
+                    'ntb' => $ntb,
+                    'tgl_bayar'  => $transaction_time,
+                    'updated_by' => 'BJB From API Callback',
+                    'status_bayar' => 1,
+                    'chanel_bayar' => 'BJB Virtual Account',
+                    'total_bayar_bjb' => $transaction_amount
+                ]);
 
                 if ($data->userApi != null) {
                     $url = $data->userApi->url_callback;
@@ -148,7 +159,7 @@ class CallBackController extends Controller
         $data->update([
             'ntb' => $ntb,
             'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transcationDate)->format('Y-m-d H:i:s'),
-            'updated_by' => 'Pembayaran QRIS',
+            'updated_by' => 'BJB From API Callback',
             'status_bayar' => 1,
             'chanel_bayar' => 'QRIS | ' . $customerName,
             'total_bayar_bjb' => $transcationAmount
