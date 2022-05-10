@@ -150,7 +150,7 @@ class CallBackController extends Controller
             'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transcationDate)->format('Y-m-d H:i:s'),
             'updated_by' => 'Pembayaran QRIS',
             'status_bayar' => 1,
-            'chanel_bayar' => $customerName,
+            'chanel_bayar' => 'QRIS | ' . $customerName,
             'total_bayar_bjb' => $transcationAmount
         ]);
 
