@@ -67,12 +67,12 @@ class Handler extends ExceptionHandler
             }
             return response()->json([
                 'status'  => $rendered->getStatusCode(),
-                'message' => $exception->getMessage(),
+                'message' => $messages[$key],
                 'error'   => [
                     'message'   => $messages,
                     'parameter' => $request->all(),
                 ]
-            ], 400);
+            ], $rendered->getStatusCode());
         } else {
             $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
             $message = env('APP_DEBUG', false) ? $exception->getMessage() : Response::$statusTexts[$statusCode];

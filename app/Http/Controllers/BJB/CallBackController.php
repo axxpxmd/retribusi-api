@@ -126,54 +126,74 @@ class CallBackController extends Controller
      */
     public function callbackQRIS(Request $request)
     {
-        $time = Carbon::now();
-
-        //* Get Params
-        $type = $request->type;
-        $transcationDate = $request->transcationDate;
-        $transcationAmount = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transcationAmount);
-        $customerName = $request->customerName;
-        $InvoiceNumber = $request->InvoiceNumber;
-
-        //TODO: LOG
-        LOG::channel('qris')->info('invoiceID:' . $InvoiceNumber . ' | ' . 'type:' . $type . ' | ' . 'transaction date:' . $transcationDate . ' | ' . 'transaction amount:' . $transcationAmount . ' | ' . 'customer name:' . $customerName);
-
-        //TODO: Check type
-        if ($type != 'TRANSACTION')
-            return response()->json([
-                'status'  => 422,
-                'message' => 'type harus berisi TRANSACTION.',
-            ], 422);
-
-        $data = TransaksiOPD::where('invoice_id', $InvoiceNumber)->first();
-
-        if ($data == null)
-            return response()->json([
-                'status'  => 404,
-                'message' => 'Error, Nomor invoice tidak ditemukan.',
-            ], 404);
-
-        //* NTB (encrypt no_bayar)   
-        $ntb = \md5($data->no_bayar);
-
-        $data->update([
-            'ntb' => $ntb,
-            'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transcationDate)->format('Y-m-d H:i:s'),
-            'updated_by' => 'BJB From API Callback',
-            'status_bayar' => 1,
-            'chanel_bayar' => 'QRIS | ' . $customerName,
-            'total_bayar_bjb' => $transcationAmount
+        $this->validate($request, [
+            'transcationDate' => 'required',
+            'transcationAmount' => 'required',
+            'customerName' => 'required',
+            'InvoiceNumber' => 'required'
         ]);
 
-        $status = [
-            'code' => 200,
-            'description' => 'OK',
-            'datetime' => $time->format('Y-m-d') . 'T' . $time->format('H:i:s')
-        ];
+        try {
+            $time = Carbon::now();
 
-        return response()->json([
-            'metadata'  => null,
-            'status' => $status,
-        ]);
+            //* Get Params
+            $type = $request->type;
+            $transcationDate = $request->transcationDate;
+            $transcationAmount = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transcationAmount);
+            $customerName = $request->customerName;
+            $InvoiceNumber = $request->InvoiceNumber;
+
+            //TODO: LOG INFO
+            LOG::channel('qris')->info('invoiceID:' . $InvoiceNumber . ' | ' . 'type:' . $type . ' | ' . 'transaction date:' . $transcationDate . ' | ' . 'transaction amount:' . $transcationAmount . ' | ' . 'customer name:' . $customerName);
+
+            //TODO: Check type
+            if ($type != 'TRANSACTION')
+                return response()->json([
+                    'status'  => 422,
+                    'message' => 'type harus berisi TRANSACTION.',
+                ], 422);
+
+            $data = TransaksiOPD::where('invoice_id', $InvoiceNumber)->first();
+
+            if ($data == null)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'Error, Nomor invoice tidak ditemukan.',
+                ], 404);
+
+            //* NTB (encrypt no_bayar)   
+            $ntb = \md5($data->no_bayar);
+
+            $data->update([
+                'ntb' => $ntb,
+                'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transcationDate)->format('Y-m-d H:i:s'),
+                'updated_by' => 'BJB From API Callback',
+                'status_bayar' => 1,
+                'chanel_bayar' => 'QRIS | ' . $customerName,
+                'total_bayar_bjb' => $transcationAmount
+            ]);
+
+            $status = [
+                'code' => 200,
+                'description' => 'OK',
+                'datetime' => $time->format('Y-m-d') . 'T' . $time->format('H:i:s')
+            ];
+
+            //TODO: LOG INFO
+            LOG::channel('qris')->info('invoiceID:' . $InvoiceNumber . ' | ', $status);
+
+            return response()->json([
+                'metadata'  => null,
+                'status' => $status,
+            ]);
+        } catch (\Throwable $th) {
+            //TODO: LOG INFO
+            LOG::channel('qris')->error($th->getMessage());
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'server error',
+            ], 500);
+        }
     }
 }

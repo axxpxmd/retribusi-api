@@ -33,6 +33,7 @@ $router->group(['middleware' => 'auth', 'namespace' => 'BJB'], function () use (
 // Callback VA
 $router->post('callback', 'BJB\CallBackController@callBack');
 
+// Callback QRIS
 $router->post('callback-qris', 'BJB\CallBackController@callbackQRIS');
 
 //* --------------------- Client ------------------- *//
