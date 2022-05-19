@@ -115,8 +115,12 @@ class CallBackController extends Controller
                 ], 401);
             }
         } catch (\Throwable $th) {
+            //TODO: LOG INFO
+            LOG::channel('va')->error($th->getMessage());
+
             return response()->json([
-                'message' => $th->getMessage(),
+                'status' => 500,
+                'message' => 'server error',
             ], 500);
         }
     }
