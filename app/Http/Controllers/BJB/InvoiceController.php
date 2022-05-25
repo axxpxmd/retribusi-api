@@ -54,7 +54,7 @@ class InvoiceController extends Controller
             }
 
             $data = array(
-                'id'     => Crypt::encrypt($data->id),
+                'id'     => \base64_encode($data->id),
                 'alamat' => $data->alamat_wp,
                 'lokasi' => $data->lokasi,
                 'no_bayar'      => $data->no_bayar,
@@ -88,25 +88,31 @@ class InvoiceController extends Controller
                 'data'    => $data
             ], 200);
         } catch (\Throwable $th) {
+            //TODO: LOG ERROR
+            LOG::channel('atm')->error($th->getMessage());
+
             return response()->json([
-                'message' => $th->getMessage(),
+                'status' => 500,
+                'message' => 'server error',
             ], 500);
         }
     }
 
     public function update(Request $request, $id)
     {
-        try {
-            $id = Crypt::decrypt($request->id);
-        } catch (DecryptException $e) {
-            //TODO: LOG ERROR
-            LOG::channel('atm')->error('ID tidak valid. | ' . $id);
+        // try {
+        //     $id = Crypt::decrypt($request->id);
+        // } catch (DecryptException $e) {
+        //     //TODO: LOG ERROR
+        //     LOG::channel('atm')->error('ID tidak valid. | ' . $id);
 
-            return response([
-                'status' => 500,
-                'message' => 'ID tidak valid.'
-            ], 500);
-        }
+        //     return response([
+        //         'status' => 500,
+        //         'message' => 'ID tidak valid.'
+        //     ], 500);
+        // }
+
+        $id = \base64_decode($id);
 
         //* Get params
         $ntb    = $request->ntb;
@@ -160,8 +166,12 @@ class InvoiceController extends Controller
                 'message' => 'Success, Data berhasil diperbaharui.',
             ], 200);
         } catch (\Throwable $th) {
+            //TODO: LOG ERROR
+            LOG::channel('atm')->error($th->getMessage());
+
             return response()->json([
-                'message' => $th->getMessage(),
+                'status' => 500,
+                'message' => 'server error',
             ], 500);
         }
     }
