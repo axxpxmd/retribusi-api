@@ -115,7 +115,7 @@ class CallBackController extends Controller
                 ], 401);
             }
         } catch (\Throwable $th) {
-            //TODO: LOG INFO
+            //TODO: LOG ERROR
             LOG::channel('va')->error($th->getMessage());
 
             return response()->json([
@@ -191,7 +191,7 @@ class CallBackController extends Controller
                 'status' => $status,
             ]);
         } catch (\Throwable $th) {
-            //TODO: LOG INFO
+            //TODO: LOG ERROR
             LOG::channel('qris')->error($th->getMessage());
 
             return response()->json([

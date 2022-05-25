@@ -99,10 +99,13 @@ class InvoiceController extends Controller
         try {
             $id = Crypt::decrypt($request->id);
         } catch (DecryptException $e) {
+            //TODO: LOG ERROR
+            LOG::channel('atm')->error('ID tidak valid. | ' . $id);
+
             return response([
                 'status' => 500,
                 'message' => 'ID tidak valid.'
-            ]);
+            ], 500);
         }
 
         //* Get params
