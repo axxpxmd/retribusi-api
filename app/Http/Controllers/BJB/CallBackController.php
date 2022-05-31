@@ -131,13 +131,13 @@ class CallBackController extends Controller
     public function callbackQRIS(Request $request)
     {
         //TODO: LOG INFO
-        LOG::channel('qris')->info('invoiceID:' . $request->InvoiceNumber . ' | ' . 'type:' . $request->type . ' | ' . 'transaction date:' . $request->transcationDate . ' | ' . 'transaction amount:' . $request->transcationAmount . ' | ' . 'customer name:' . $request->customerName);
+        LOG::channel('qris')->info('invoiceID:' . $request->invoiceNumber . ' | ' . 'type:' . $request->type . ' | ' . 'transaction date:' . $request->transactionDate . ' | ' . 'transaction amount:' . $request->transactionAmount . ' | ' . 'customer name:' . $request->customerName);
 
         $this->validate($request, [
-            'transcationDate' => 'required',
-            'transcationAmount' => 'required',
+            'transactionDate' => 'required',
+            'transactionAmount' => 'required',
             'customerName' => 'required',
-            'InvoiceNumber' => 'required'
+            'invoiceNumber' => 'required'
         ]);
 
         try {
@@ -145,10 +145,10 @@ class CallBackController extends Controller
 
             //* Get Params
             $type = $request->type;
-            $transcationDate = $request->transcationDate;
-            $transcationAmount = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transcationAmount);
+            $transactionDate = $request->transactionDate;
+            $transactionAmount = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transactionAmount);
             $customerName = $request->customerName;
-            $InvoiceNumber = $request->InvoiceNumber;
+            $invoiceNumber = $request->invoiceNumber;
 
             //TODO: Check type
             if ($type != 'TRANSACTION')
@@ -157,7 +157,7 @@ class CallBackController extends Controller
                     'message' => 'type harus berisi TRANSACTION.',
                 ], 422);
 
-            $data = TransaksiOPD::where('invoice_id', $InvoiceNumber)->first();
+            $data = TransaksiOPD::where('invoice_id', $invoiceNumber)->first();
 
             if ($data == null)
                 return response()->json([
@@ -170,11 +170,11 @@ class CallBackController extends Controller
 
             $data->update([
                 'ntb' => $ntb,
-                'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transcationDate)->format('Y-m-d H:i:s'),
+                'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transactionDate)->format('Y-m-d H:i:s'),
                 'updated_by' => 'BJB From API Callback',
                 'status_bayar' => 1,
                 'chanel_bayar' => 'QRIS | ' . $customerName,
-                'total_bayar_bjb' => $transcationAmount
+                'total_bayar_bjb' => $transactionAmount
             ]);
 
             $status = [
@@ -184,7 +184,7 @@ class CallBackController extends Controller
             ];
 
             //TODO: LOG INFO
-            LOG::channel('qris')->info('invoiceID:' . $InvoiceNumber . ' | ', $status);
+            LOG::channel('qris')->info('invoiceID:' . $invoiceNumber . ' | ', $status);
 
             return response()->json([
                 'metadata'  => null,
