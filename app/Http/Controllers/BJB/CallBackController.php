@@ -151,19 +151,30 @@ class CallBackController extends Controller
             $invoiceNumber = $request->invoiceNumber;
 
             //TODO: Check type
-            if ($type != 'TRANSACTION')
-                return response()->json([
+            if ($type != 'TRANSACTION') {
+                $status = [
                     'status'  => 422,
-                    'message' => 'type harus berisi TRANSACTION.',
-                ], 422);
+                    'message' => 'type harus berisi TRANSACTIO',
+                ];
+
+                //TODO: LOG ERROR
+                LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
+
+                return response()->json($status, 422);
+            }
 
             $data = TransaksiOPD::where('invoice_id', $invoiceNumber)->first();
+            if ($data == null) {
+                $status = [
+                    'status'  => 422,
+                    'message' => 'Nomor invoice tidak ditemukan.',
+                ];
 
-            if ($data == null)
-                return response()->json([
-                    'status'  => 404,
-                    'message' => 'Error, Nomor invoice tidak ditemukan.',
-                ], 404);
+                //TODO: LOG ERROR
+                LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
+
+                return response()->json($status, 404);
+            }
 
             //* NTB (encrypt no_bayar)   
             $ntb = \md5($data->no_bayar);
