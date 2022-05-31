@@ -130,6 +130,9 @@ class CallBackController extends Controller
      */
     public function callbackQRIS(Request $request)
     {
+        //TODO: LOG INFO
+        LOG::channel('qris')->info('invoiceID:' . $request->InvoiceNumber . ' | ' . 'type:' . $request->type . ' | ' . 'transaction date:' . $request->transcationDate . ' | ' . 'transaction amount:' . $request->transcationAmount . ' | ' . 'customer name:' . $request->customerName);
+
         $this->validate($request, [
             'transcationDate' => 'required',
             'transcationAmount' => 'required',
@@ -146,9 +149,6 @@ class CallBackController extends Controller
             $transcationAmount = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transcationAmount);
             $customerName = $request->customerName;
             $InvoiceNumber = $request->InvoiceNumber;
-
-            //TODO: LOG INFO
-            LOG::channel('qris')->info('invoiceID:' . $InvoiceNumber . ' | ' . 'type:' . $type . ' | ' . 'transaction date:' . $transcationDate . ' | ' . 'transaction amount:' . $transcationAmount . ' | ' . 'customer name:' . $customerName);
 
             //TODO: Check type
             if ($type != 'TRANSACTION')
