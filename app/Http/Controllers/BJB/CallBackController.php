@@ -154,7 +154,7 @@ class CallBackController extends Controller
             if ($type != 'TRANSACTION') {
                 $status = [
                     'status'  => 422,
-                    'message' => 'type harus berisi TRANSACTIO',
+                    'message' => 'type harus berisi TRANSACTION',
                 ];
 
                 //TODO: LOG ERROR
