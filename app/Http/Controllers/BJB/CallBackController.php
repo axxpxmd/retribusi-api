@@ -74,6 +74,19 @@ class CallBackController extends Controller
                         'message' => 'Error, Data nomor bayar tidak ditemukan.',
                     ], 404);
 
+                //* Cek Status Bayar
+                if ($data->status_bayar == 1) {
+                    $status = [
+                        'status'  => 404,
+                        'message' => 'Data ini sudah dibayar menggunakan ' . $data->chanel_bayar,
+                    ];
+
+                    //TODO: LOG ERROR
+                    LOG::channel('qris')->error('No Bayar:' . $client_refnum . ' | ', $status);
+
+                    return response()->json($status, 404);
+                }
+
                 //* Check Amount
                 if ($data->jumlah_bayar != $transaction_amount) {
                     return response()->json([
@@ -168,6 +181,19 @@ class CallBackController extends Controller
                 $status = [
                     'status'  => 422,
                     'message' => 'Nomor invoice tidak ditemukan.',
+                ];
+
+                //TODO: LOG ERROR
+                LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
+
+                return response()->json($status, 404);
+            }
+
+            //* Cek Status Bayar
+            if ($data->status_bayar == 1) {
+                $status = [
+                    'status'  => 404,
+                    'message' => 'Data ini sudah dibayar menggunakan ' . $data->chanel_bayar,
                 ];
 
                 //TODO: LOG ERROR
