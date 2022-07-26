@@ -162,6 +162,7 @@ class CallBackController extends Controller
             $transactionAmount = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transactionAmount);
             $customerName = $request->customerName;
             $invoiceNumber = $request->invoiceNumber;
+            $rrn = $request->rrn;
 
             //TODO: Check type
             if ($type != 'TRANSACTION') {
@@ -203,7 +204,11 @@ class CallBackController extends Controller
             }
 
             //* NTB (encrypt no_bayar)   
-            $ntb = \md5($data->no_bayar);
+            if ($rrn) {
+                $ntb = $rrn;
+            } else {
+                $ntb = \md5($data->no_bayar);
+            }
 
             $data->update([
                 'ntb' => $ntb,
