@@ -82,7 +82,7 @@ class CallBackController extends Controller
                     ];
 
                     //TODO: LOG ERROR
-                    LOG::channel('qris')->error('No Bayar:' . $client_refnum . ' | ', $status);
+                    LOG::channel('va')->error('No Bayar:' . $client_refnum . ' | ', $status);
 
                     return response()->json($status, 404);
                 }
