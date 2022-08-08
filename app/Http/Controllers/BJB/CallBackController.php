@@ -192,15 +192,16 @@ class CallBackController extends Controller
 
             //* Cek Status Bayar
             if ($data->status_bayar == 1) {
+                $statuCode = $data->ntb == $rrn ? 200 : 404;
                 $status = [
-                    'status'  => 404,
+                    'status'  => $statuCode,
                     'message' => 'Data ini sudah dibayar menggunakan ' . $data->chanel_bayar,
                 ];
 
                 //TODO: LOG ERROR
                 LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
 
-                return response()->json($status, 404);
+                return response()->json($status, $statuCode);
             }
 
             //* NTB (encrypt no_bayar)   
