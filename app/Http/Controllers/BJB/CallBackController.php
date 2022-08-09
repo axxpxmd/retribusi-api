@@ -144,7 +144,7 @@ class CallBackController extends Controller
     public function callbackQRIS(Request $request)
     {
         //TODO: LOG INFO
-        LOG::channel('qris')->info('invoiceID:' . $request->invoiceNumber . ' | ' . 'type:' . $request->type . ' | ' . 'transaction date:' . $request->transactionDate . ' | ' . 'transaction amount:' . $request->transactionAmount . ' | ' . 'customer name:' . $request->customerName);
+        LOG::channel('qris')->info('invoiceID:' . $request->invoiceNumber . ' | ' . 'type:' . $request->type . ' | ' . 'transaction date:' . $request->transactionDate . ' | ' . 'transaction amount:' . $request->transactionAmount . ' | ' . 'customer name:' . $request->customerName . ' | ' . 'rrn:' . $request->rrn);
 
         $this->validate($request, [
             'transactionDate' => 'required',
