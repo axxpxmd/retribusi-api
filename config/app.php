@@ -31,6 +31,8 @@ return [
 
     'default' => env('QUEUE_CONNECTION', 'sync'),
 
+    'timezone' => 'Asia/Jakarta',
+
     /*
     |--------------------------------------------------------------------------
     | Queue Connections
