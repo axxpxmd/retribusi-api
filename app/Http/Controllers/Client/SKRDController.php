@@ -409,7 +409,7 @@ class SKRDController extends Controller
     {
         try {
             $data = TransaksiOPD::whereno_bayar($no_bayar)->first();
-            
+
             $dataResponse = [
                 'n_opd' => $data->opd->n_opd,
                 'jenis_pendapatan' => $data->jenis_pendapatan->jenis_pendapatan,
@@ -437,6 +437,7 @@ class SKRDController extends Controller
                 'nomor_va_bjb' => $data->nomor_va_bjb,
                 'status_ttd' => $data->status_ttd,
                 'text_qris' => $data->text_qris,
+                'status_bayar' => $data->status_bayar,
                 'invoice_id' => $data->invoice_id,
                 'created_by' => $data->created_by
             ];
