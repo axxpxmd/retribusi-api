@@ -36,6 +36,9 @@ $router->post('callback', 'BJB\CallBackController@callBack');
 // Callback QRIS
 $router->post('callback-qris', 'BJB\CallBackController@callbackQRIS');
 
+// Show No Bayar
+$router->get('no-bayar/{no_bayar}', 'Client\SKRDController@showNoBayar');
+
 //* --------------------- Client ------------------- *//
 $router->group(['namespace' => 'Client'], function () use ($router) {
     // SKRD

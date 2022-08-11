@@ -404,4 +404,52 @@ class SKRDController extends Controller
             ], 500);
         }
     }
+
+    public function showNoBayar(Request $request, $no_bayar)
+    {
+        try {
+            $data = TransaksiOPD::whereno_bayar($no_bayar)->first();
+            
+            $dataResponse = [
+                'n_opd' => $data->opd->n_opd,
+                'jenis_pendapatan' => $data->jenis_pendapatan->jenis_pendapatan,
+                'rincian_jenis_pendapatan' => $data->rincian_jenis_pendapatan,
+                'uraian_retribusi' => $data->uraian_retribusi,
+                'nmr_rekening' => $data->rincian_jenis->nmr_rekening,
+                'nmr_rekening_denda' => $data->rincian_jenis->nmr_rekening_denda,
+                'nama_ttd' => $data->nm_ttd,
+                'nip_ttd' => $data->nip_ttd,
+                'tgl_ttd' => $data->tgl_ttd,
+                'nmr_daftar' => $data->nmr_daftar,
+                'nama_wr' => $data->nm_wajib_pajak,
+                'alamat_wr' => $data->alamat_wp,
+                'kecamatan' => $data->kecamatan->n_kecamatan,
+                'kelurahan' => $data->kelurahan->n_kelurahan,
+                'lokasi' => $data->lokasi,
+                'tgl_skrd' => $data->tgl_skrd_awal,
+                'jatuh_tempo' => $data->tgl_skrd_akhir,
+                'no_skrd' => $data->no_skrd,
+                'no_bayar' => $data->no_bayar,
+                'ketetapan' => $data->jumlah_bayar,
+                'denda' => $data->denda,
+                'diskon' => $data->diskon,
+                'total_bayar' => $data->total_bayar,
+                'nomor_va_bjb' => $data->nomor_va_bjb,
+                'status_ttd' => $data->status_ttd,
+                'text_qris' => $data->text_qris,
+                'invoice_id' => $data->invoice_id,
+                'created_by' => $data->created_by
+            ];
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Success',
+                'data'   => $dataResponse
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
 }
