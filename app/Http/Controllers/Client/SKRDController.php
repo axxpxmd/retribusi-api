@@ -335,6 +335,8 @@ class SKRDController extends Controller
                 'total_bayar' => $data->total_bayar,
                 'nomor_va_bjb' => $data->nomor_va_bjb,
                 'status_ttd' => $data->status_ttd,
+                'text_qris' => $data->text_qris,
+                'invoice_id' => $data->invoice_id,
                 'created_by' => $data->created_by
             ];
 
