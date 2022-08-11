@@ -405,10 +405,18 @@ class SKRDController extends Controller
         }
     }
 
-    public function showNoBayar(Request $request, $no_bayar)
+    public function showNoBayar($no_bayar)
     {
         try {
             $data = TransaksiOPD::whereno_bayar($no_bayar)->first();
+
+
+            //* Check Data
+            if ($data == null)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'Error, Data nomor bayar tidak ditemukan.',
+                ], 404);
 
             $dataResponse = [
                 'n_opd' => $data->opd->n_opd,
