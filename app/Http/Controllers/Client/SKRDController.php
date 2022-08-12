@@ -410,7 +410,6 @@ class SKRDController extends Controller
         try {
             $data = TransaksiOPD::whereno_bayar($no_bayar)->first();
 
-
             //* Check Data
             if ($data == null)
                 return response()->json([
