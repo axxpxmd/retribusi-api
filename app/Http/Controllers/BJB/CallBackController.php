@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
+use App\Http\Services\VABJB;
 use App\Http\Controllers\Controller;
 
 // Queque
@@ -28,6 +29,11 @@ use App\Models\TransaksiOPD;
 
 class CallBackController extends Controller
 {
+    public function __construct(VABJB $vabjb)
+    {
+        $this->vabjb = $vabjb;
+    }
+
     /**
      * Payment with BJB Virtual Account
      */
@@ -153,6 +159,11 @@ class CallBackController extends Controller
             'invoiceNumber' => 'required'
         ]);
 
+        /* Tahapan :
+         *  1. tmtransaksi_opd
+         *  2. Make VA Expired
+         */
+
         try {
             $time = Carbon::now();
 
@@ -177,6 +188,7 @@ class CallBackController extends Controller
                 return response()->json($status, 422);
             }
 
+            //* Tahap 1
             $data = TransaksiOPD::where('invoice_id', $invoiceNumber)->first();
             if ($data == null) {
                 $status = [
@@ -190,7 +202,7 @@ class CallBackController extends Controller
                 return response()->json($status, 404);
             }
 
-            //* Cek Status Bayar
+            //TODO: Cek Status Bayar
             if ($data->status_bayar == 1) {
                 $statuCode = $data->ntb == $rrn ? 200 : 404;
                 $status = [
@@ -204,15 +216,9 @@ class CallBackController extends Controller
                 return response()->json($status, $statuCode);
             }
 
-            //* NTB (encrypt no_bayar)   
-            if ($rrn) {
-                $ntb = $rrn;
-            } else {
-                $ntb = \md5($data->no_bayar);
-            }
-
+            //TODO: Update Data
             $data->update([
-                'ntb' => $ntb,
+                'ntb' => $rrn,
                 'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transactionDate)->format('Y-m-d H:i:s'),
                 'updated_by' => 'BJB From API Callback',
                 'status_bayar' => 1,
@@ -225,6 +231,45 @@ class CallBackController extends Controller
                 'description' => 'OK',
                 'datetime' => $time->format('Y-m-d') . 'T' . $time->format('H:i:s')
             ];
+
+            //* Tahap 2
+            $amount = $data->total_bayar;
+            $customerName = $data->nm_wajib_pajak;
+            $va_number    = (int) $data->nomor_va_bjb;
+
+            $expiredDateAddMinute = Carbon::createFromFormat('d/m/Y H:i:s', $transactionDate)->format('Y-m-d H:i:s');
+            $expiredDateAddMinute = Carbon::parse($expiredDateAddMinute);
+            $expiredDateAddMinute->addMinutes(1);
+            $expiredDate = $expiredDateAddMinute->format('Y-m-d H:i:s');
+
+            //TODO: Get Token BJB
+            $resGetTokenBJB = $this->vabjb->getTokenBJB();
+            if ($resGetTokenBJB->successful()) {
+                $resJson = $resGetTokenBJB->json();
+                if ($resJson['rc'] != 0000)
+                    return response()->json([
+                        'message' => 'Terjadi kegagalan saat mengambil token. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
+                    ], 422);
+                $tokenBJB = $resJson['data'];
+            } else {
+                return response()->json([
+                    'message' => "Terjadi kegagalan saat mengambil token. Error Code " . $resGetTokenBJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
+                ], 422);
+            }
+
+            //TODO: Update VA BJB
+            $resUpdateVABJB = $this->vabjb->updateVaBJB($tokenBJB, $amount, $expiredDate, $customerName, $va_number);
+            if ($resUpdateVABJB->successful()) {
+                $resJson = $resUpdateVABJB->json();
+                if (isset($resJson['rc']) != 0000)
+                    return response()->json([
+                        'message' => 'Terjadi kegagalan saat memperbarui Virtual Account. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
+                    ], 422);
+            } else {
+                return response()->json([
+                    'message' => "Terjadi kegagalan saat memperbarui Virtual Account. Error Code " . $resUpdateVABJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
+                ], 422);
+            }
 
             //TODO: LOG INFO
             LOG::channel('qris')->info('invoiceID:' . $invoiceNumber . ' | ', $status);

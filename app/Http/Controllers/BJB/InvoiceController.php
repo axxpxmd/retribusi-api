@@ -14,21 +14,26 @@
 
 namespace App\Http\Controllers\BJB;
 
+use App\Http\Services\VABJB;
+use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Contracts\Encryption\DecryptException;
-
-use App\Http\Controllers\Controller;
 
 // Queque
 use App\Jobs\CallbackJob;
 
 // Models
 use App\Models\TransaksiOPD;
+use Illuminate\Support\Carbon;
 
 class InvoiceController extends Controller
 {
+    public function __construct(VABJB $vabjb)
+    {
+        $this->vabjb = $vabjb;
+    }
+
     public function invoice($no_bayar)
     {
         //* Get params
@@ -100,18 +105,6 @@ class InvoiceController extends Controller
 
     public function update(Request $request, $id)
     {
-        // try {
-        //     $id = Crypt::decrypt($request->id);
-        // } catch (DecryptException $e) {
-        //     //TODO: LOG ERROR
-        //     LOG::channel('atm')->error('ID tidak valid. | ' . $id);
-
-        //     return response([
-        //         'status' => 500,
-        //         'message' => 'ID tidak valid.'
-        //     ], 500);
-        // }
-
         $id = \base64_decode($id);
 
         //* Get params
@@ -126,7 +119,14 @@ class InvoiceController extends Controller
         //TODO: LOG
         LOG::channel('atm')->info('Update Data | ' . 'ntb:' . $ntb . ' | ' . 'denda:' . $denda . ' | ' . 'no_bku:' . $no_bku . ' | ' . 'tgl_bku:' . $tgl_bku . ' | ' . 'tgl_bayar:' . $tgl_bayar . ' | ' . 'status_bayar:' . $status_bayar . ' | ' . 'total_bayar_bjb:' . $total_bayar_bjb);
 
+        /* Tahapan :
+         *  1. tmtransaksi_opd
+         *  2. Make VA Expired
+         *  3. Forward callback from BJB to Client
+         */
+
         try {
+            //* Tahap 1
             $data = TransaksiOPD::where('id', $id)->first();
 
             if ($data == null) {
@@ -148,6 +148,46 @@ class InvoiceController extends Controller
                 'total_bayar_bjb' => $total_bayar_bjb,
             ]);
 
+            //* Tahap 2
+            $amount = $data->total_bayar;
+            $customerName = $data->nm_wajib_pajak;
+            $va_number    = (int) $data->nomor_va_bjb;
+
+            $expiredDateAddMinute = $tgl_bayar;
+            $expiredDateAddMinute = Carbon::parse($expiredDateAddMinute);
+            $expiredDateAddMinute->addMinutes(1);
+            $expiredDate = $expiredDateAddMinute->format('Y-m-d H:i:s');
+
+            //TODO: Get Token BJB
+            $resGetTokenBJB = $this->vabjb->getTokenBJB();
+            if ($resGetTokenBJB->successful()) {
+                $resJson = $resGetTokenBJB->json();
+                if ($resJson['rc'] != 0000)
+                    return response()->json([
+                        'message' => 'Terjadi kegagalan saat mengambil token. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
+                    ], 422);
+                $tokenBJB = $resJson['data'];
+            } else {
+                return response()->json([
+                    'message' => "Terjadi kegagalan saat mengambil token. Error Code " . $resGetTokenBJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
+                ], 422);
+            }
+
+            //TODO: Update VA BJB
+            $resUpdateVABJB = $this->vabjb->updateVaBJB($tokenBJB, $amount, $expiredDate, $customerName, $va_number);
+            if ($resUpdateVABJB->successful()) {
+                $resJson = $resUpdateVABJB->json();
+                if (isset($resJson['rc']) != 0000)
+                    return response()->json([
+                        'message' => 'Terjadi kegagalan saat memperbarui Virtual Account. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
+                    ], 422);
+            } else {
+                return response()->json([
+                    'message' => "Terjadi kegagalan saat memperbarui Virtual Account. Error Code " . $resUpdateVABJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
+                ], 422);
+            }
+
+            //* Tahap 3
             if ($data->userApi != null) {
                 $url = $data->userApi->url_callback;
                 $reqBody = [
