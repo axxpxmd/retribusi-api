@@ -239,7 +239,7 @@ class CallBackController extends Controller
 
             $expiredDateAddMinute = Carbon::createFromFormat('d/m/Y H:i:s', $transactionDate)->format('Y-m-d H:i:s');
             $expiredDateAddMinute = Carbon::parse($expiredDateAddMinute);
-            $expiredDateAddMinute->addMinutes(1);
+            $expiredDateAddMinute->addMinutes(5);
             $expiredDate = $expiredDateAddMinute->format('Y-m-d H:i:s');
 
             //TODO: Get Token BJB
