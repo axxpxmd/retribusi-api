@@ -474,7 +474,7 @@ class SKRDController extends Controller
                 ], 404);
 
             //* Check TTD
-            if ($data->status_ttd != 1 || $data->status_ttd != 3)
+            if ($data->status_ttd == 2 || $data->status_ttd == 4)
                 return response()->json([
                     'status'  => 404,
                     'message' => 'File SKRD belum ditanda tangan.',
