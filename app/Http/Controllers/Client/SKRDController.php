@@ -460,4 +460,45 @@ class SKRDController extends Controller
             ], 500);
         }
     }
+
+    public function showPDFSTS($no_bayar)
+    {
+        try {
+            $data = TransaksiOPD::whereno_bayar($no_bayar)->first();
+
+            //* Check Data
+            if ($data == null)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'Error, Data nomor bayar tidak ditemukan.',
+                ], 404);
+
+            //* Check TTD
+            if ($data->status_ttd == 1 || $data->status_ttd == 3)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'File SKRD belum ditanda tangan.',
+                ], 404);
+
+            //* Check status bayar
+            if ($data->status_bayar == 1)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'SKRD belum dibayar.',
+                ], 404);
+
+            $fileName = str_replace(' ', '', $data->nm_wajib_pajak) . '-' . $data->no_skrd . ".pdf";
+            $link = 'https://dataawan.tangerangselatankota.go.id/retribusi/file_ttd_skrd/' . $fileName;
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Success',
+                'data'   => $link
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
 }
