@@ -38,6 +38,7 @@ $router->post('callback-qris', 'BJB\CallBackController@callbackQRIS');
 
 // Show No Bayar
 $router->get('no-bayar/{no_bayar}', 'Client\SKRDController@showNoBayar');
+$router->get('bukti-sts/{no_bayar}', 'Client\SKRDController@showPDFSTS');
 
 //* --------------------- Client ------------------- *//
 $router->group(['namespace' => 'Client'], function () use ($router) {
