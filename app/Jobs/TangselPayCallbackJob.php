@@ -24,14 +24,12 @@ class TangselPayCallbackJob extends Job
         try {
             $res = Http::post($url, $reqBody);
 
-            $resJson = $res->json();
+            $res->json();
             if ($res->successful()) {
-                if ($resJson['status'] == 200) {
-                    echo 'berhasil';
-                } else {
-                    echo $resJson['status'] . ' Error, status code tidak sesuai';
-                }
-            } 
+                echo 'berhasil';
+            } else{
+                echo 'server error';
+            }
         } catch (\Throwable $th) {
             echo $th;
         }

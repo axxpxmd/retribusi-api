@@ -259,32 +259,34 @@ class CallBackController extends Controller
             $expiredDate = $expiredDateAddMinute->format('Y-m-d H:i:s');
 
             //TODO: Get Token BJB
-            $resGetTokenBJB = $this->vabjb->getTokenBJB();
-            if ($resGetTokenBJB->successful()) {
-                $resJson = $resGetTokenBJB->json();
-                if ($resJson['rc'] != 0000)
+            if ($data->nomor_va_bjb) {
+                $resGetTokenBJB = $this->vabjb->getTokenBJB();
+                if ($resGetTokenBJB->successful()) {
+                    $resJson = $resGetTokenBJB->json();
+                    if ($resJson['rc'] != 0000)
+                        return response()->json([
+                            'message' => 'Terjadi kegagalan saat mengambil token. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
+                        ], 422);
+                    $tokenBJB = $resJson['data'];
+                } else {
                     return response()->json([
-                        'message' => 'Terjadi kegagalan saat mengambil token. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
+                        'message' => "Terjadi kegagalan saat mengambil token. Error Code " . $resGetTokenBJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
                     ], 422);
-                $tokenBJB = $resJson['data'];
-            } else {
-                return response()->json([
-                    'message' => "Terjadi kegagalan saat mengambil token. Error Code " . $resGetTokenBJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
-                ], 422);
-            }
-
-            //TODO: Update VA BJB
-            $resUpdateVABJB = $this->vabjb->updateVaBJB($tokenBJB, $amount, $expiredDate, $customerName, $va_number);
-            if ($resUpdateVABJB->successful()) {
-                $resJson = $resUpdateVABJB->json();
-                if (isset($resJson['rc']) != 0000)
+                }
+    
+                //TODO: Update VA BJB
+                $resUpdateVABJB = $this->vabjb->updateVaBJB($tokenBJB, $amount, $expiredDate, $customerName, $va_number);
+                if ($resUpdateVABJB->successful()) {
+                    $resJson = $resUpdateVABJB->json();
+                    if (isset($resJson['rc']) != 0000)
+                        return response()->json([
+                            'message' => 'Terjadi kegagalan saat memperbarui Virtual Account. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
+                        ], 422);
+                } else {
                     return response()->json([
-                        'message' => 'Terjadi kegagalan saat memperbarui Virtual Account. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
+                        'message' => "Terjadi kegagalan saat memperbarui Virtual Account. Error Code " . $resUpdateVABJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
                     ], 422);
-            } else {
-                return response()->json([
-                    'message' => "Terjadi kegagalan saat memperbarui Virtual Account. Error Code " . $resUpdateVABJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
-                ], 422);
+                }
             }
 
             //TODO: LOG INFO
