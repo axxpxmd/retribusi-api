@@ -21,17 +21,19 @@ class TangselPayCallbackJob extends Job
         $url = $this->url;
         $reqBody = $this->reqBody;
 
-        $res = Http::post($url, $reqBody);
+        try {
+            $res = Http::post($url, $reqBody);
 
-        $resJson = $res->json();
-        if ($res->successful()) {
-            if ($resJson['status'] == 200) {
-                echo 'berhasil';
-            } else {
-                echo $resJson['status'] . ' Error, status code tidak sesuai';
-            }
-        } else {
-            echo 'gagal kirim callback';
+            $resJson = $res->json();
+            if ($res->successful()) {
+                if ($resJson['status'] == 200) {
+                    echo 'berhasil';
+                } else {
+                    echo $resJson['status'] . ' Error, status code tidak sesuai';
+                }
+            } 
+        } catch (\Throwable $th) {
+            echo $th;
         }
     }
 }

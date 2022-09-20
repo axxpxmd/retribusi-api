@@ -291,7 +291,7 @@ class CallBackController extends Controller
             LOG::channel('qris')->info('invoiceID:' . $invoiceNumber . ' | ', $status);
 
             //* Sent callback to Tangselpay
-            $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-va';
+            $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-qris';
             $reqBodyTangselPay = [
                 'type' => $type,
                 'merchantName' => $merchantName,
@@ -301,7 +301,8 @@ class CallBackController extends Controller
                 'transactionReference' => $transcationReference,
                 'merchantBalance' => $merchantBalance,
                 'customerName' => $customerName,
-                'invoiceNumber' => $invoiceNumber
+                'invoiceNumber' => $invoiceNumber,
+                'rrn' => $rrn
             ];
             dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
 
