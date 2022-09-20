@@ -188,7 +188,7 @@ class CallBackController extends Controller
             $rrn = $request->rrn;
             $merchantName = $request->merchantName;
             $transcationStatus = $request->transcationStatus;
-            $transcationReference = $request->transcationReference;
+            $transactionReference = $request->transactionReference;
             $merchantBalance = $request->merchantBalance;
 
             //TODO: Check type
@@ -300,7 +300,7 @@ class CallBackController extends Controller
                 'transactionDate' => $transactionDate,
                 'transactionStatus' => $transcationStatus,
                 'transactionAmount' => $transactionAmount,
-                'transactionReference' => $transcationReference,
+                'transactionReference' => $transactionReference,
                 'merchantBalance' => $merchantBalance,
                 'customerName' => $customerName,
                 'invoiceNumber' => $invoiceNumber,

@@ -27,8 +27,8 @@ class TangselPayCallbackJob extends Job
             $res->json();
             if ($res->successful()) {
                 echo 'berhasil';
-            } else{
-                echo 'server error';
+            } else {
+                echo 'server error' . $res;
             }
         } catch (\Throwable $th) {
             echo $th;
