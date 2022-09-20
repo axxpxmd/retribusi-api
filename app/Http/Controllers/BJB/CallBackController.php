@@ -23,6 +23,7 @@ use App\Http\Controllers\Controller;
 
 // Queque
 use App\Jobs\CallbackJob;
+use App\Jobs\TangselPayCallbackJob;
 
 // Models
 use App\Models\TransaksiOPD;
@@ -123,7 +124,16 @@ class CallBackController extends Controller
                     dispatch(new CallbackJob($reqBody, $url));
                 }
 
-                // 
+                //* Sent callback to Tangselpay
+                $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-va';
+                $reqBodyTangselPay = [
+                    'status' => $status,
+                    'va_number' => $va_number,
+                    'client_refnum' => $client_refnum,
+                    'transaction_time' => $transaction_time,
+                    'transaction_amount' => $transaction_amount
+                ];
+                dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
 
                 return response()->json([
                     'response_code'  => 0000,
@@ -176,6 +186,10 @@ class CallBackController extends Controller
             $customerName = $request->customerName;
             $invoiceNumber = $request->invoiceNumber;
             $rrn = $request->rrn;
+            $merchantName = $request->merchantName;
+            $transcationStatus = $request->transcationStatus;
+            $transcationReference = $request->transcationReference;
+            $merchantBalance = $request->merchantBalance;
 
             //TODO: Check type
             if ($type != 'TRANSACTION') {
@@ -275,6 +289,21 @@ class CallBackController extends Controller
 
             //TODO: LOG INFO
             LOG::channel('qris')->info('invoiceID:' . $invoiceNumber . ' | ', $status);
+
+            //* Sent callback to Tangselpay
+            $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-va';
+            $reqBodyTangselPay = [
+                'type' => $type,
+                'merchantName' => $merchantName,
+                'transactionDate' => $transactionDate,
+                'transactionStatus' => $transcationStatus,
+                'transactionAmount' => $transactionAmount,
+                'transactionReference' => $transcationReference,
+                'merchantBalance' => $merchantBalance,
+                'customerName' => $customerName,
+                'invoiceNumber' => $invoiceNumber
+            ];
+            dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
 
             return response()->json([
                 'metadata'  => null,
