@@ -95,12 +95,12 @@ class CallBackController extends Controller
                 }
 
                 //* Check Amount
-                if ($data->jumlah_bayar != $transaction_amount) {
-                    return response()->json([
-                        'status'  => 403,
-                        'message' => 'Error, nominal bayar tidak sesuai.',
-                    ], 403);
-                }
+                // if ($data->jumlah_bayar != $transaction_amount) {
+                //     return response()->json([
+                //         'status'  => 403,
+                //         'message' => 'Error, nominal bayar tidak sesuai.',
+                //     ], 403);
+                // }
 
                 $data->update([
                     'ntb' => $ntb,
@@ -133,7 +133,7 @@ class CallBackController extends Controller
                     'transaction_time' => $transaction_time,
                     'transaction_amount' => $transaction_amount
                 ];
-                dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
+                // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
 
                 return response()->json([
                     'response_code'  => 0000,
@@ -306,7 +306,7 @@ class CallBackController extends Controller
                 'invoiceNumber' => $invoiceNumber,
                 'rrn' => $rrn
             ];
-            dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
+            // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
 
             return response()->json([
                 'metadata'  => null,
