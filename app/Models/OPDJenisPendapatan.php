@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OPDJenisPendapatan extends Model
 {
-    protected $table   = 'tmopd_jenis_pendapatan';
+    protected $table   = 'tr_opd_jenis_pendapatans';
     protected $guarded = [];
     public $timestamps = false;
 
@@ -28,9 +28,9 @@ class OPDJenisPendapatan extends Model
     // 
     public static function getJenisPendapatanByOpd($opd_id)
     {
-        $datas = OPDJenisPendapatan::select('tmopd_jenis_pendapatan.id_jenis_pendapatan as id', 'tmjenis_pendapatan.jenis_pendapatan')
-            ->join('tmjenis_pendapatan', 'tmjenis_pendapatan.id', '=', 'tmopd_jenis_pendapatan.id_jenis_pendapatan')
-            ->where('tmopd_jenis_pendapatan.id_opd', $opd_id)
+        $datas = OPDJenisPendapatan::select('tr_opd_jenis_pendapatans.id_jenis_pendapatan as id', 'tmjenis_pendapatan.jenis_pendapatan')
+            ->join('tmjenis_pendapatan', 'tmjenis_pendapatan.id', '=', 'tr_opd_jenis_pendapatans.id_jenis_pendapatan')
+            ->where('tr_opd_jenis_pendapatans.id_opd', $opd_id)
             ->get();
 
         return $datas;

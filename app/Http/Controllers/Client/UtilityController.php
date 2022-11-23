@@ -15,7 +15,6 @@
 namespace App\Http\Controllers\Client;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 
 use App\Http\Controllers\Controller;
 
@@ -40,28 +39,28 @@ class UtilityController extends Controller
             ], 401);
         }
 
-        // try {
-        $opd_id = $user->opd_id;
-        $jenis_pendapatans = OPDJenisPendapatan::getJenisPendapatanByOpd($opd_id);
+        try {
+            $opd_id = $user->opd_id;
+            $jenis_pendapatans = OPDJenisPendapatan::getJenisPendapatanByOpd($opd_id);
 
-        $datas = [];
-        foreach ($jenis_pendapatans as $key => $i) {
-            $datas[$key] = [
-                'id' => $i->id,
-                'jenis_pendapatan' => $i->jenis_pendapatan
-            ];
+            $datas = [];
+            foreach ($jenis_pendapatans as $key => $i) {
+                $datas[$key] = [
+                    'id' => $i->id,
+                    'jenis_pendapatan' => $i->jenis_pendapatan
+                ];
+            }
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Success',
+                'data'    => $datas
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
         }
-
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Success',
-            'data'    => $datas
-        ], 200);
-        // } catch (\Throwable $th) {
-        //     return response()->json([
-        //         'message' => $th->getMessage(),
-        //     ], 500);
-        // }
     }
 
     public function getRincianPendapatan(Request $request, $jenis_pendapatan_id)

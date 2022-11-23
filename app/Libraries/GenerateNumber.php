@@ -30,14 +30,16 @@ class GenerateNumber
             $noUrutNoSKRD = '1';
         }
 
-        //* no_skrd terdiri dari 4 digits 
+        //* no_skrd terdiri dari 5 digits
         if (\strlen($noUrutNoSKRD) == 1) {
-            $generateSKRD = '000' . $noUrutNoSKRD;
+            $generateSKRD = '0000' . $noUrutNoSKRD;
         } elseif (\strlen($noUrutNoSKRD) == 2) {
-            $generateSKRD = '00' . $noUrutNoSKRD;
+            $generateSKRD = '000' . $noUrutNoSKRD;
         } elseif (\strlen($noUrutNoSKRD) == 3) {
-            $generateSKRD = '0' . $noUrutNoSKRD;
+            $generateSKRD = '00' . $noUrutNoSKRD;
         } elseif (\strlen($noUrutNoSKRD) == 4) {
+            $generateSKRD = '0' . $noUrutNoSKRD;
+        } elseif (\strlen($noUrutNoSKRD) == 5) {
             $generateSKRD = $noUrutNoSKRD;
         }
 
