@@ -19,9 +19,9 @@ use Validator;
 use Carbon\Carbon;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 
 use App\Http\Services\VABJB;
+use App\Traits\ResponseAction;
 use App\Libraries\GenerateNumber;
 use App\Http\Controllers\Controller;
 
@@ -34,6 +34,8 @@ use App\Models\RincianJenisPendapatan;
 
 class SKRDController extends Controller
 {
+    use ResponseAction;
+
     public function __construct(VABJB $vabjb)
     {
         $this->vabjb = $vabjb;
@@ -41,13 +43,11 @@ class SKRDController extends Controller
 
     public function index(Request $request)
     {
+        //* Check Api Key
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
         if (!$api_key || !$user) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Invalid API Key!'
-            ], 401);
+            return $this->failure('Invalid API Key!', 422);
         }
 
         try {
@@ -67,9 +67,7 @@ class SKRDController extends Controller
                 'data'    => $skrds,
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage(),
-            ], 500);
+            return $this->failure('Server Error.', 500);
         }
     }
 
