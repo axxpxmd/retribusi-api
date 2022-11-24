@@ -14,8 +14,10 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Helpers\Helper;
 use Illuminate\Http\Request;
 
+use App\Traits\ResponseAction;
 use App\Http\Controllers\Controller;
 
 // Models
@@ -28,15 +30,20 @@ use App\Models\RincianJenisPendapatan;
 
 class UtilityController extends Controller
 {
+    use ResponseAction;
+
+    public function __construct(Helper $helper)
+    {
+        $this->helper = $helper;
+    }
+
     public function getJenisPendapatan(Request $request)
     {
+        //* Check Api Key
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
         if (!$api_key || !$user) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Invalid API Key!'
-            ], 401);
+            return $this->failure('Invalid API Key!', 422);
         }
 
         try {
@@ -57,24 +64,28 @@ class UtilityController extends Controller
                 'data'    => $datas
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage(),
-            ], 500);
+            return $this->failure('Server Error.', 500);
         }
     }
 
     public function getRincianPendapatan(Request $request, $jenis_pendapatan_id)
     {
+        //* Check Api Key
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
         if (!$api_key || !$user) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Invalid API Key!'
-            ], 401);
+            return $this->failure('Invalid API Key!', 422);
         }
 
         try {
+            //* Check jenis_pendapatan_id
+            $opd_id = $user->opd_id;
+            $checkJenisPendapatan = $this->helper->checkExistedJenisPendapatan($opd_id, $jenis_pendapatan_id);
+            if (!$checkJenisPendapatan) {
+                $message = 'jenis_pendapatan_id tidak sesuai.';
+                return $this->failure($message, 422);
+            }
+
             $rincian_pendapatans = RincianJenisPendapatan::where('id_jenis_pendapatan', $jenis_pendapatan_id)->get();
 
             $datas = [];
@@ -94,9 +105,7 @@ class UtilityController extends Controller
                 'data'    => $datas
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage(),
-            ], 500);
+            return $this->failure('Server Error.', 500);
         }
     }
 
@@ -105,10 +114,7 @@ class UtilityController extends Controller
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
         if (!$api_key || !$user) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Invalid API Key!'
-            ], 401);
+            return $this->failure('Invalid API Key!', 422);
         }
 
         try {
@@ -130,9 +136,7 @@ class UtilityController extends Controller
                 'data'    => $datas
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage(),
-            ], 500);
+            return $this->failure('Server Error.', 500);
         }
     }
 
@@ -141,10 +145,7 @@ class UtilityController extends Controller
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
         if (!$api_key || !$user) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Invalid API Key!'
-            ], 401);
+            return $this->failure('Invalid API Key!', 422);
         }
 
         try {
@@ -156,9 +157,7 @@ class UtilityController extends Controller
                 'data'   => $kecamatans
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage(),
-            ], 500);
+            return $this->failure('Server Error.', 500);
         }
     }
 
@@ -167,10 +166,7 @@ class UtilityController extends Controller
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
         if (!$api_key || !$user) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Invalid API Key!'
-            ], 401);
+            return $this->failure('Invalid API Key!', 422);
         }
 
         try {
@@ -182,9 +178,7 @@ class UtilityController extends Controller
                 'data'   => $kelurahans
             ], 200);
         } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage(),
-            ], 500);
+            return $this->failure('Server Error.', 500);
         }
     }
 }
