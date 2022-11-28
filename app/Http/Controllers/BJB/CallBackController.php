@@ -167,7 +167,7 @@ class CallBackController extends Controller
         $this->validate($request, [
             'transactionDate' => 'required',
             'transactionAmount' => 'required',
-            'customerName' => 'required',
+            // 'customerName' => 'required',
             'invoiceNumber' => 'required'
         ]);
 

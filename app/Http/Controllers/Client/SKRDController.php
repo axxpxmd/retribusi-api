@@ -85,15 +85,15 @@ class SKRDController extends Controller
 
     public function store(Request $request)
     {
+        //* Check Api Key
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
         if (!$api_key || !$user) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Invalid API Key!'
-            ], 401);
+            return $this->failure('Invalid API Key!', 422);
         }
         $id_opd  = $user->opd_id;
+
+        // dd($request->all());
 
         $this->validate($request, [
             'tgl_ttd' => 'required',

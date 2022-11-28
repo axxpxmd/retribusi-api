@@ -79,7 +79,7 @@ class Handler extends ExceptionHandler
             $exception = new HttpException($statusCode, $message);
         }
 
-        // Resonse 
+        // Response 
         return response()->json([
             'status'  => $rendered->getStatusCode(),
             'message' => $exception->getMessage()
