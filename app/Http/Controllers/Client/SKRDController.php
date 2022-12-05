@@ -210,7 +210,9 @@ class SKRDController extends Controller
                 'no_bayar'         => $no_bayar,
                 'created_by'       => $user->full_name . ' | ' . 'API Retribusi',
                 'c_status'         => 1,
-                'user_api'         => $user->id
+                'user_api'         => $user->id,
+                'email'            => $request->email,
+                'no_telp'          => $request->no_telp
             ];
             $dataSKRD = TransaksiOPD::create($data);
 
@@ -353,7 +355,9 @@ class SKRDController extends Controller
                 'status_ttd' => $dataSKRD->status_ttd,
                 'no_skrd' => $dataSKRD->no_skrd,
                 'no_bayar' => $dataSKRD->no_bayar,
-                'created_by' => $dataSKRD->created_by
+                'created_by' => $dataSKRD->created_by,
+                'email' => $dataSKRD->email,
+                'no_telp' => $dataSKRD->no_telp
             ];
 
             return response()->json([
@@ -425,7 +429,9 @@ class SKRDController extends Controller
                 'status_ttd' => $data->status_ttd,
                 'text_qris' => $data->text_qris,
                 'invoice_id' => $data->invoice_id,
-                'created_by' => $data->created_by
+                'created_by' => $data->created_by,
+                'email' => $data->email,
+                'no_telp' => $data->no_telp
             ];
 
             return response()->json([
