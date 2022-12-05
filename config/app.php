@@ -9,11 +9,17 @@ return [
     'ipbjb2' => env('IP_BJB2'),
     'ipkmnf' => env('IP_KMNF'),
 
-    // BJB
+    // VA BJB
     'cin_bjb' => env('CIN_BJB'),
     'ip_api_bjb' => env('IP_API_BJB'),
     'key_bjb' => env('KEY_BJB'),
     'client_id_bjb' => env('CLIENT_ID_BJB'),
+
+    // QRIS BJB
+    'msisdn_bjb' => env('MSISDN_BJB'),
+    'password_bjb' => env('PASSWORD_BJB'),
+    'ip_qris' => env('IP_QRIS'),
+    'app_id_qris' => env('APP_ID_QRIS'),
 
     'timezone' => 'UTC',
     'timezone' => 'Asia/Jakarta',

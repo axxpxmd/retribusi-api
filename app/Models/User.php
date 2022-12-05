@@ -14,27 +14,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 {
     use Authenticatable, Authorizable, HasFactory;
 
-    protected $table = 'tmuser_api';
+    protected $table = 'tmusers';
+    protected $fillable = ['username', 'password'];
+    protected $hidden = ['password',];
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'username',
-        'password'
-    ];
-
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'password',
-        'id'
-    ];
+    public function pengguna()
+    {
+        return $this->belongsTo(UserDetail::class, 'id', 'user_id');
+    }
 
     public $timestamps = false;
 
@@ -46,10 +33,5 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function getJWTCustomClaims()
     {
         return [];
-    }
-
-    public function pengguna()
-    {
-        return $this->belongsTo(UserDetail::class, 'id', 'user_id');
     }
 }

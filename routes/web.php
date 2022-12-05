@@ -44,7 +44,7 @@ $router->get('bukti-sts/{no_bayar}', 'Client\SKRDController@showPDFSTS');
 $router->group(['namespace' => 'Client'], function () use ($router) {
     // SKRD
     $router->get('skrd', 'SKRDController@index');
-    // $router->post('skrd', 'SKRDController@store');
+    $router->post('skrd', 'SKRDController@store');
     $router->get('skrd/{id}', 'SKRDController@show');
     $router->post('skrd/{id}', 'SKRDController@update');
 
