@@ -60,7 +60,7 @@ class UtilityController extends Controller
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Success',
+                'message' => 'Sukses',
                 'data'    => $datas
             ], 200);
         } catch (\Throwable $th) {
@@ -101,7 +101,7 @@ class UtilityController extends Controller
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Success',
+                'message' => 'Sukses',
                 'data'    => $datas
             ], 200);
         } catch (\Throwable $th) {
@@ -132,7 +132,7 @@ class UtilityController extends Controller
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Success',
+                'message' => 'Sukses',
                 'data'    => $datas
             ], 200);
         } catch (\Throwable $th) {
@@ -153,7 +153,7 @@ class UtilityController extends Controller
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Success',
+                'message' => 'Sukses',
                 'data'   => $kecamatans
             ], 200);
         } catch (\Throwable $th) {
@@ -174,7 +174,7 @@ class UtilityController extends Controller
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Success',
+                'message' => 'Sukses',
                 'data'   => $kelurahans
             ], 200);
         } catch (\Throwable $th) {

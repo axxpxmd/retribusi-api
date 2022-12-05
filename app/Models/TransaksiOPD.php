@@ -62,7 +62,7 @@ class TransaksiOPD extends Model
         $date = $now->format('Y-m-d');
 
         $select = [
-            'tmtransaksi_opd.id as id', 'no_skrd', 'no_bayar', 'nm_wajib_pajak', 'tgl_skrd_awal', 'tgl_skrd_akhir', 'jumlah_bayar', 'status_ttd', 'jenis_pendapatan'
+            'tmtransaksi_opd.id as id', 'no_skrd', 'no_bayar', 'nm_wajib_pajak as nama_pemohon', 'tgl_skrd_awal as tgl_skrd', 'tgl_skrd_akhir as tgl_jatuh_tempo', 'jumlah_bayar', 'status_ttd', 'jenis_pendapatan'
         ];
 
         $data = TransaksiOPD::select($select)
