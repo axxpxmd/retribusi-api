@@ -115,9 +115,10 @@ class InvoiceController extends Controller
         $tgl_bayar = $request->tgl_bayar;
         $status_bayar = $request->status_bayar;
         $total_bayar_bjb = $request->total_bayar_bjb;
+        $chanel_bayar = $request->chanel_bayar;
 
         //TODO: LOG
-        LOG::channel('atm')->info('Update Data | ' . 'ntb:' . $ntb . ' | ' . 'denda:' . $denda . ' | ' . 'no_bku:' . $no_bku . ' | ' . 'tgl_bku:' . $tgl_bku . ' | ' . 'tgl_bayar:' . $tgl_bayar . ' | ' . 'status_bayar:' . $status_bayar . ' | ' . 'total_bayar_bjb:' . $total_bayar_bjb);
+        LOG::channel('atm')->info('Update Data | ' . 'ntb:' . $ntb . ' | ' . 'denda:' . $denda . ' | ' . 'no_bku:' . $no_bku . ' | ' . 'tgl_bku:' . $tgl_bku . ' | ' . 'tgl_bayar:' . $tgl_bayar . ' | ' . 'status_bayar:' . $status_bayar . ' | ' . 'total_bayar_bjb:' . $total_bayar_bjb . ' | ' . 'chanel_bayar:' . $chanel_bayar);
 
         /* Tahapan :
          *  1. tmtransaksi_opd
@@ -144,7 +145,7 @@ class InvoiceController extends Controller
                 'tgl_bayar' => $tgl_bayar,
                 'updated_by'   => 'Bank BJB',
                 'status_bayar' => $status_bayar,
-                'chanel_bayar' => 'ATM BJB',
+                'chanel_bayar' => $chanel_bayar ? $chanel_bayar . ' BJB' : 'ATM BJB',
                 'total_bayar_bjb' => $total_bayar_bjb,
             ]);
 
