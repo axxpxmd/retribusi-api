@@ -145,7 +145,7 @@ class InvoiceController extends Controller
                 'tgl_bayar' => $tgl_bayar,
                 'updated_by'   => 'Bank BJB',
                 'status_bayar' => $status_bayar,
-                'chanel_bayar' => $chanel_bayar ? $chanel_bayar . ' BJB' : 'ATM BJB',
+                'chanel_bayar' => $chanel_bayar ? $chanel_bayar : 'ATM BJB',
                 'total_bayar_bjb' => $total_bayar_bjb,
             ]);
 
