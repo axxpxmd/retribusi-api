@@ -136,7 +136,7 @@ class InvoiceController extends Controller
                     'message' => 'Data nomor bayar tidak ditemukan.'
                 ], 404);
             }
-
+ 
             $data->update([
                 'ntb'    => $ntb,
                 'denda'  => $denda,
