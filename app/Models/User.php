@@ -14,7 +14,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 {
     use Authenticatable, Authorizable, HasFactory;
 
-    protected $table = 'tmusers';
+    protected $table = 'tmuser_api';
     protected $fillable = ['username', 'password'];
     protected $hidden = ['password',];
 

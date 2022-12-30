@@ -88,6 +88,11 @@ class InvoiceController extends Controller
             LOG::channel('atm')->info('Menampilkan SKRD ', $data);
 
             return response()->json([
+                'status'  => 404,
+                'message' => 'Error. TB'
+            ], 404);
+
+            return response()->json([
                 'status'  => 200,
                 'message' => 'Success',
                 'data'    => $data
@@ -120,6 +125,11 @@ class InvoiceController extends Controller
         //TODO: LOG
         LOG::channel('atm')->info('Update Data | ' . 'ntb:' . $ntb . ' | ' . 'denda:' . $denda . ' | ' . 'no_bku:' . $no_bku . ' | ' . 'tgl_bku:' . $tgl_bku . ' | ' . 'tgl_bayar:' . $tgl_bayar . ' | ' . 'status_bayar:' . $status_bayar . ' | ' . 'total_bayar_bjb:' . $total_bayar_bjb . ' | ' . 'chanel_bayar:' . $chanel_bayar);
 
+        return response()->json([
+            'status'  => 404,
+            'message' => 'Error. TB'
+        ], 404);
+
         /* Tahapan :
          *  1. tmtransaksi_opd
          *  2. Make VA Expired
@@ -136,7 +146,7 @@ class InvoiceController extends Controller
                     'message' => 'Data nomor bayar tidak ditemukan.'
                 ], 404);
             }
- 
+
             $data->update([
                 'ntb'    => $ntb,
                 'denda'  => $denda,

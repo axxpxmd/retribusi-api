@@ -50,6 +50,11 @@ class CallBackController extends Controller
         //TODO: LOG
         LOG::channel('va')->info('status:' . $status . ' | ' . 'va number:' . $va_number . ' | ' . 'client refnum:' . $client_refnum . ' | ' . 'transaction time:' . $transaction_time . ' | ' . 'transaction amount:' . $transaction_amount);
 
+        return response()->json([
+            'status'  => 404,
+            'message' => 'Error. TB'
+        ], 404);
+
         $ip    = $request->ip();
         $ipBJB = config('app.ipbjb');
         $ipBJB2 = config('app.ipbjb2');
@@ -163,6 +168,11 @@ class CallBackController extends Controller
     {
         //TODO: LOG INFO
         LOG::channel('qris')->info('invoiceID:' . $request->invoiceNumber . ' | ' . 'type:' . $request->type . ' | ' . 'transaction date:' . $request->transactionDate . ' | ' . 'transaction amount:' . $request->transactionAmount . ' | ' . 'customer name:' . $request->customerName . ' | ' . 'rrn:' . $request->rrn);
+
+        return response()->json([
+            'status'  => 404,
+            'message' => 'Error. TB'
+        ], 404);
 
         $this->validate($request, [
             'transactionDate' => 'required',
