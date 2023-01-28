@@ -144,7 +144,7 @@ class InvoiceController extends Controller
 
             if ($va_number) {
                 //TODO: Get Token VA
-                list($err, $errMsg, $tokenBJB) = $this->vabjbres->getTokenBJBres();
+                list($err, $errMsg, $tokenBJB) = $this->vabjbres->getTokenBJBres(1);
 
                 //TODO: Update VA BJB (make Va expired)
                 list($err, $errMsg, $VABJB) = $this->vabjbres->updateVABJBres($tokenBJB, $amount, $expiredDate, $customerName, $va_number, 1, $clientRefnum);
