@@ -97,10 +97,10 @@ class InvoiceController extends Controller
         $ntb    = $request->ntb;
         $denda  = $request->denda;
         $no_bku = $request->no_bku;
-        $tgl_bku      = $request->tgl_bku;
-        $tgl_bayar    = $request->tgl_bayar;
-        $chanel_bayar = $request->chanel_bayar;
-        $status_bayar = $request->status_bayar;
+        $tgl_bku         = $request->tgl_bku;
+        $tgl_bayar       = $request->tgl_bayar;
+        $chanel_bayar    = $request->chanel_bayar;
+        $status_bayar    = $request->status_bayar;
         $total_bayar_bjb = $request->total_bayar_bjb;
 
         //TODO: LOG
