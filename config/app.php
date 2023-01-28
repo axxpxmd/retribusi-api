@@ -21,6 +21,13 @@ return [
     'ip_qris' => env('IP_QRIS'),
     'app_id_qris' => env('APP_ID_QRIS'),
 
+    // Whatsapp
+    'wagateway_ipserver' => env('WAGATEWAY_IPSERVER'),
+    'wagateway_apikey_login' => env('WAGATEWAY_APIKEY_LOGIN'),
+    'wagateway_apikey' => env('WAGATEWAY_APIKEY'),
+
+    'url_retribusi' => env('URL_RETRIBUSI'),
+
     'timezone' => 'UTC',
     'timezone' => 'Asia/Jakarta',
 
