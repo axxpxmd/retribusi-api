@@ -14,7 +14,6 @@
 
 namespace App\Http\Controllers\Client;
 
-use DateTime;
 use Validator;
 use Carbon\Carbon;
 
@@ -22,15 +21,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-use App\Helpers\Helper;
-use App\Http\Services\VABJB;
 use App\Traits\ResponseAction;
-use App\Http\Services\QRISBJB;
+use App\Http\Services\VABJBRes;
 use App\Libraries\GenerateNumber;
+use App\Http\Services\QRISBJBRes;
 use App\Http\Controllers\Controller;
 
 // Models
 use App\Models\TtdOPD;
+use App\Models\Utility;
 use App\Models\UserDetail;
 use App\Models\TransaksiOPD;
 use App\Models\RincianJenisPendapatan;
@@ -39,18 +38,18 @@ class SKRDController extends Controller
 {
     use ResponseAction;
 
-    public function __construct(VABJB $vabjb, QRISBJB $qrisbjb, Helper $helper)
+    public function __construct(VABJBRes $vabjbres, QRISBJBRes $qrisbjbres)
     {
-        $this->vabjb = $vabjb;
-        $this->qrisbjb = $qrisbjb;
-        $this->helper = $helper;
+        $this->vabjbres = $vabjbres;
+        $this->qrisbjbres = $qrisbjbres;
     }
 
     public function index(Request $request)
     {
-        //* Check Api Key
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
+
+        //* Check Api Key
         if (!$api_key || !$user) {
             return $this->failure('Invalid API Key!', 422);
         }
@@ -74,18 +73,6 @@ class SKRDController extends Controller
         } catch (\Throwable $th) {
             return $this->failure('Server Error.', 500);
         }
-    }
-
-    public function getDiffDays($tgl_skrd_akhir)
-    {
-        $timeNow = Carbon::now();
-
-        $dateTimeNow = new DateTime($timeNow);
-        $expired     = new DateTime($tgl_skrd_akhir . ' 23:59:59');
-        $interval    = $dateTimeNow->diff($expired);
-        $daysDiff    = $interval->format('%r%a');
-
-        return $daysDiff;
     }
 
     public static function generateNumber($id_opd, $id_jenis_pendapatan)
@@ -117,9 +104,10 @@ class SKRDController extends Controller
 
     public function store(Request $request)
     {
-        //* Check Api Key
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
+
+        //* Check Api Key
         if (!$api_key || !$user) {
             return $this->failure('Invalid API Key!', 422);
         }
@@ -151,9 +139,9 @@ class SKRDController extends Controller
 
         //* Check jenis_pendapatan_id
         $opd_id = $user->opd_id;
-        $checkJenisPendapatan = $this->helper->checkExistedJenisPendapatan($opd_id, $request->id_jenis_pendapatan);
+        $checkJenisPendapatan = RincianJenisPendapatan::checkExistedJenisPendapatan($opd_id, $request->id_jenis_pendapatan);
         if (!$checkJenisPendapatan) {
-            $message = 'jenis_pendapatan_id tidak sesuai.';
+            $message = 'parameter jenis_pendapatan_id tidak sesuai.';
             return $this->failure($message, 422);
         }
 
@@ -172,7 +160,6 @@ class SKRDController extends Controller
 
             $tgl_skrd_awal  = Carbon::createFromFormat('Y-m-d',  $request->tgl_skrd);
             $tgl_skrd_akhir = $tgl_skrd_awal->addDays(30)->format('Y-m-d');
-            $daysDiff       = $this->getDiffDays($tgl_skrd_akhir);
 
             $penanda_tangan = TtdOPD::where('id', $request->id_penanda_tangan)->first();
             $rincian_jenis_pendapatan = RincianJenisPendapatan::find($request->id_rincian_jenis_pendapatan);
@@ -225,104 +212,56 @@ class SKRDController extends Controller
 
             //*: Check Expired Date (jika tgl_skrd_akhir kurang dari tanggal sekarang maka VA dan QRIS tidak terbuat)
             //*: Check Amount (jika nominal 0 rupiah makan VA dan QRIS tidak terbuat)
-            if ($daysDiff > 0 && $amount != 0) {
+            list($dayDiff, $monthDiff) = Utility::getDiffDate($tgl_skrd_akhir);
+            if ($dayDiff > 0 && $amount != 0) {
                 //* Tahap 3
                 //TODO: Get Token VA
-                $resGetTokenBJB = $this->vabjb->getTokenBJB();
-                if ($resGetTokenBJB->successful()) {
-                    $resJson = $resGetTokenBJB->json();
-                    if ($resJson['rc'] != 0000) {
-                        DB::rollback(); //* DB Transaction Failed
-                        return response()->json([
-                            'message' => 'Server Error'
-                        ], 500);
-                    }
-                    $tokenBJB = $resJson['data'];
-                } else {
+                list($err, $errMsg, $tokenBJB) = $this->vabjbres->getTokenBJBres(1);
+                if ($err) {
                     DB::rollback(); //* DB Transaction Failed
                     return response()->json([
-                        'message' => "Server Error"
+                        'message' => $errMsg
                     ], 500);
                 }
 
                 //TODO: Create VA
-                $resGetVABJB = $this->vabjb->createVABJB($tokenBJB, $clientRefnum, $amount, $expiredDate, $customerName, $productCode);
-                if ($resGetVABJB->successful()) {
-                    $resJson = $resGetVABJB->json();
-                    //* LOG VA
-                    $dataVA = [
-                        'no_bayar' => $no_bayar,
-                        'data' => $resJson
-                    ];
-                    Log::channel('skrd_create_va')->info('Create VA SKRD', $dataVA);
-                    if (isset($resJson['rc']) != 0000) {
-                        DB::rollback(); //* DB Transaction Failed
-                        return response()->json([
-                            'message' => 'Server Error'
-                        ], 500);
-                    }
-                    $VABJB = $resJson['va_number'];
-
+                list($err, $errMsg, $VABJB) = $this->vabjbres->createVABJBres($tokenBJB, $clientRefnum, $amount, $expiredDate, $customerName, $productCode, 1, $no_bayar);
+                if ($err) {
+                    DB::rollback(); //* DB Transaction Failed
+                    return response()->json([
+                        'message' => $errMsg
+                    ], 500);
+                } else {
                     //* Update data SKRD
                     $dataSKRD->update([
                         'nomor_va_bjb' => $VABJB
                     ]);
-                } else {
-                    DB::rollback(); //* DB Transaction Failed
-                    return response()->json([
-                        'message' => "Server Error"
-                    ], 500);
                 }
 
                 //* Tahap 4
                 if ($amount <= 10000000) { //* Nominal QRIS maksimal 10 juta, jika lebih maka tidak terbuat
                     //TODO: Get Token QRIS
-                    $resGetTokenQRISBJB = $this->qrisbjb->getToken();
-                    if ($resGetTokenQRISBJB->successful()) {
-                        $resJsonQRIS = $resGetTokenQRISBJB->json();
-                        if ($resJsonQRIS["status"]["code"] != 200)
-                            return response()->json([
-                                'message' => 'Terjadi kegagalan saat mengambil token QRIS BJB. Error Code : ' . $resJsonQRIS["status"]["code"] . '. Message : ' . $resJsonQRIS["status"]["description"] . ''
-                            ], 422);
-                        $tokenQRISBJB = $resGetTokenQRISBJB->header('X-AUTH-TOKEN');
-                    } else {
+                    list($err, $errMsg, $tokenQRISBJB) = $this->qrisbjbres->getTokenQrisres();
+                    if ($err) {
+                        DB::rollback(); //* DB Transaction Failed
                         return response()->json([
-                            'message' => "Terjadi kegagalan saat mengambil token QRIS BJB. Error Code. Silahkan laporkan masalah ini pada administrator"
-                        ], 422);
+                            'message' => $errMsg
+                        ], 500);
                     }
 
                     //TODO: Create QRIS
-                    $resCreateQRISBJB = $this->qrisbjb->createQRIS($tokenQRISBJB, $amount, $no_hp);
-                    $resJsonQRIS      = $resCreateQRISBJB->json();
-
-                    //* LOG
-                    $dataQris = [
-                        'no_bayar' => $no_bayar,
-                        'data' => $resJsonQRIS
-                    ];
-                    Log::channel('skrd_create_qris')->info('Create Qris SKRD', $dataQris);
-
-                    if ($resCreateQRISBJB->successful()) {
-                        if ($resJsonQRIS["status"]["code"] != 200) {
-                            DB::rollback(); //* DB Transaction Failed
-                            return response()->json([
-                                'message' => 'Server Error'
-                            ], 500);
-                        }
-                        $respondBody = $resJsonQRIS["body"]["CreateInvoiceQRISDinamisExtResponse"];
-                        $invoiceId = $respondBody["invoiceId"]["_text"];
-                        $textQRIS = $respondBody["stringQR"]["_text"];
-
+                    list($err, $errMsg, $invoiceId, $textQRIS) = $this->qrisbjbres->createQRISres($tokenQRISBJB, $amount, $no_hp, 1, $no_bayar);
+                    if ($err) {
+                        DB::rollback(); //* DB Transaction Failed
+                        return response()->json([
+                            'message' => $errMsg
+                        ], 500);
+                    } else {
                         //* Update data SKRD
                         $dataSKRD->update([
                             'invoice_id' => $invoiceId,
                             'text_qris' => $textQRIS
                         ]);
-                    } else {
-                        DB::rollback(); //* DB Transaction Failed
-                        return response()->json([
-                            'message' => "Server Error"
-                        ], 500);
                     }
                 }
             }
@@ -375,6 +314,8 @@ class SKRDController extends Controller
     {
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
+
+        //* Check Api Key
         if (!$api_key || !$user) {
             return response()->json([
                 'status'  => 401,

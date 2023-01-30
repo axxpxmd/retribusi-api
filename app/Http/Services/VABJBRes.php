@@ -60,12 +60,6 @@ class VABJBRes
             case 1:
                 $log = 'Create VA SKRD (create)';
                 break;
-            case 2:
-                $log = 'Create VA SKRD (update)';
-                break;
-            case 3:
-                $log = 'Create VA STRD (perbarui)';
-                break;
             default:
                 # code...
                 break;
