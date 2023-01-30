@@ -110,7 +110,7 @@ class InvoiceController extends Controller
          *  1. tmtransaksi_opd
          *  2. Make VA Expired
          *  3. Forward callback from BJB to Client
-         *  4. Send WhatsApp
+         *  4. Send invoice from Whatsapp
          */
 
         try {

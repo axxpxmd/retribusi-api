@@ -101,7 +101,7 @@ class VABJBRes
 
         switch ($jenis) {
             case 1:
-                $log = 'Update VA SKRD (update invoice - make VA expired)';
+                $log = 'Update VA (update invoice - make VA expired)';
                 break;
             default:
                 # code...

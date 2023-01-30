@@ -23,6 +23,7 @@ use App\Http\Controllers\Controller;
 
 // Queque
 use App\Jobs\CallbackJob;
+use App\Jobs\WhatsAppJob;
 use App\Jobs\TangselPayCallbackJob;
 
 // Models
@@ -36,39 +37,37 @@ class CallBackController extends Controller
     }
 
     /**
-     * Payment with BJB Virtual Account
+     ** Callback for payment with VA (virtual account)
      */
     public function callBack(Request $request)
     {
         //* Get params
         $status    = $request->status;
         $va_number = $request->va_number;
-        $client_refnum    = $request->client_refnum;
-        $transaction_time = $request->transaction_time;
+        $client_refnum      = $request->client_refnum;
+        $transaction_time   = $request->transaction_time;
         $transaction_amount = $request->transaction_amount;
+
+        $ip     = $request->ip();
+        $ipBJB  = config('app.ipbjb');
+        $ipBJB2 = config('app.ipbjb2');
+        $ipKMNF = config('app.ipkmnf');
 
         //TODO: LOG
         LOG::channel('va')->info('status:' . $status . ' | ' . 'va number:' . $va_number . ' | ' . 'client refnum:' . $client_refnum . ' | ' . 'transaction time:' . $transaction_time . ' | ' . 'transaction amount:' . $transaction_amount);
 
-        return response()->json([
-            'status'  => 404,
-            'message' => 'Error. TB'
-        ], 404);
-
-        $ip    = $request->ip();
-        $ipBJB = config('app.ipbjb');
-        $ipBJB2 = config('app.ipbjb2');
-        $ipKMNF = config('app.ipkmnf');
-
-        //* NTB (encrypt no_bayar)   
-        $ntb = \md5($client_refnum);
-
         //TODO: Check Status (status must 2)
-        if ($status != 2)
-            return response()->json([
-                'status'  => 422,
-                'message' => 'Error, Status harus dibayar penuh.',
-            ], 422);
+        if ($status != 2) {
+            $status = [
+                'status'  => 404,
+                'message' => 'Error, Status harus dibayar penuh.'
+            ];
+
+            //TODO: LOG ERROR
+            LOG::channel('va')->error('No Bayar:' . $client_refnum . ' | ', $status);
+
+            return response()->json($status, 404);
+        }
 
         try {
             //TODO: Check IP
@@ -83,10 +82,10 @@ class CallBackController extends Controller
                 if ($data == null)
                     return response()->json([
                         'status'  => 404,
-                        'message' => 'Error, Data nomor bayar tidak ditemukan.',
+                        'message' => 'Error, Data tidak ditemukan.',
                     ], 404);
 
-                //* Cek Status Bayar
+                //* Chek Status Bayar
                 if ($data->status_bayar == 1) {
                     $status = [
                         'status'  => 404,
@@ -99,46 +98,51 @@ class CallBackController extends Controller
                     return response()->json($status, 404);
                 }
 
-                //* Check Amount
-                // if ($data->jumlah_bayar != $transaction_amount) {
-                //     return response()->json([
-                //         'status'  => 403,
-                //         'message' => 'Error, nominal bayar tidak sesuai.',
-                //     ], 403);
-                // }
-
                 $data->update([
-                    'ntb' => $ntb,
-                    'tgl_bayar'  => $transaction_time,
-                    'updated_by' => 'BJB From API Callback',
+                    'ntb' => md5($client_refnum),
+                    'tgl_bayar'    => $transaction_time,
+                    'updated_by'   => 'BJB From API Callback',
                     'status_bayar' => 1,
                     'chanel_bayar' => 'BJB Virtual Account',
                     'total_bayar_bjb' => $transaction_amount
                 ]);
 
+                //*
                 if ($data->userApi != null) {
                     $url = $data->userApi->url_callback;
                     $reqBody = [
-                        'nomor_va_bjb' => $va_number,
-                        'no_bayar'     => $client_refnum,
-                        'waktu_bayar'  => $transaction_time,
-                        'jumlah_bayar' => $transaction_amount,
-                        'status_bayar' => 1,
+                        'nomor_va_bjb'  => $va_number,
+                        'no_bayar'      => $client_refnum,
+                        'waktu_bayar'   => $transaction_time,
+                        'jumlah_bayar'  => $transaction_amount,
+                        'status_bayar'  => 1,
                         'channel_bayar' => 'BJB Virtual Account'
                     ];
                     dispatch(new CallbackJob($reqBody, $url));
                 }
 
+                //* Send invoice from Whatsapp
+                if ($data->no_telp) {
+                    $params = [
+                        'ntb'  => md5($client_refnum),
+                        'data' => $data,
+                        'tgl_bayar'       => $transaction_time,
+                        'chanel_bayar'    => 'BJB Virtual Account',
+                        'total_bayar_bjb' => $transaction_amount,
+                    ];
+                    dispatch(new WhatsAppJob($params));
+                }
+
                 //* Sent callback to Tangselpay
                 $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-va';
                 $reqBodyTangselPay = [
-                    'status' => $status,
-                    'va_number' => $va_number,
+                    'status'        => $status,
+                    'va_number'     => $va_number,
                     'client_refnum' => $client_refnum,
-                    'transaction_time' => $transaction_time,
+                    'transaction_time'   => $transaction_time,
                     'transaction_amount' => $transaction_amount
                 ];
-                // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
+                // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay)); // belum dipake
 
                 return response()->json([
                     'response_code'  => 0000,
@@ -283,7 +287,7 @@ class CallBackController extends Controller
             //             'message' => "Terjadi kegagalan saat mengambil token. Error Code " . $resGetTokenBJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
             //         ], 422);
             //     }
-    
+
             //     //TODO: Update VA BJB
             //     $resUpdateVABJB = $this->vabjb->updateVaBJB($tokenBJB, $amount, $expiredDate, $customerName, $va_number);
             //     if ($resUpdateVABJB->successful()) {
