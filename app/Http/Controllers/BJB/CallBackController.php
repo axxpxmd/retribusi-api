@@ -27,6 +27,7 @@ use App\Jobs\WhatsAppJob;
 use App\Jobs\TangselPayCallbackJob;
 
 // Models
+use App\Models\TableLog;
 use App\Models\TransaksiOPD;
 
 class CallBackController extends Controller
@@ -53,6 +54,13 @@ class CallBackController extends Controller
         $ipBJB2 = config('app.ipbjb2');
         $ipKMNF = config('app.ipkmnf');
 
+        $paramsLog = [
+            'ntb'      => md5($client_refnum),
+            'no_bayar' => $client_refnum,
+            'jenis'    => 'Virtual Account',
+            'id_retribusi' => null,
+        ];
+
         //TODO: LOG
         LOG::channel('va')->info('status:' . $status . ' | ' . 'va number:' . $va_number . ' | ' . 'client refnum:' . $client_refnum . ' | ' . 'transaction time:' . $transaction_time . ' | ' . 'transaction amount:' . $transaction_amount);
 
@@ -65,6 +73,9 @@ class CallBackController extends Controller
 
             //TODO: LOG ERROR
             LOG::channel('va')->error('No Bayar:' . $client_refnum . ' | ', $status);
+
+            //* Save log to table
+            TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
 
             return response()->json($status, 404);
         }
@@ -79,11 +90,17 @@ class CallBackController extends Controller
                 $data = TransaksiOPD::where($where)->first();
 
                 //* Check Data
-                if ($data == null)
-                    return response()->json([
+                if ($data == null) {
+                    $status = [
                         'status'  => 404,
-                        'message' => 'Error, Data tidak ditemukan.',
-                    ], 404);
+                        'message' => 'Error, Data tidak ditemukan.'
+                    ];
+
+                    //* Save log to table
+                    TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
+
+                    return response()->json($status, 404);
+                }
 
                 //* Chek Status Bayar
                 if ($data->status_bayar == 1) {
@@ -95,6 +112,9 @@ class CallBackController extends Controller
                     //TODO: LOG ERROR
                     LOG::channel('va')->error('No Bayar:' . $client_refnum . ' | ', $status);
 
+                    //* Save log to table
+                    TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
+
                     return response()->json($status, 404);
                 }
 
@@ -103,7 +123,7 @@ class CallBackController extends Controller
                     'tgl_bayar'    => $transaction_time,
                     'updated_by'   => 'BJB From API Callback',
                     'status_bayar' => 1,
-                    'chanel_bayar' => 'BJB Virtual Account',
+                    'chanel_bayar' => 'Virtual Account',
                     'total_bayar_bjb' => $transaction_amount
                 ]);
 
@@ -144,8 +164,11 @@ class CallBackController extends Controller
                 ];
                 // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay)); // belum dipake
 
+                //* Save log to table
+                TableLog::storeLog($paramsLog);
+
                 return response()->json([
-                    'response_code'  => 0000,
+                    'response_code'    => 0000,
                     'response_message' => 'Success',
                 ]);
             } else {
