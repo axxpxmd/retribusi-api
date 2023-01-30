@@ -384,4 +384,101 @@ class SKRDController extends Controller
             return $this->failure('Server Error.', 500);
         }
     }
+
+    public function showNoBayar($no_bayar)
+    {
+        try {
+            $data = TransaksiOPD::whereno_bayar($no_bayar)->first();
+
+            //* Check Data
+            if ($data == null)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'Error, Data nomor bayar tidak ditemukan.',
+                ], 404);
+
+            $dataResponse = [
+                'n_opd' => $data->opd->n_opd,
+                'jenis_pendapatan' => $data->jenis_pendapatan->jenis_pendapatan,
+                'rincian_jenis_pendapatan' => $data->rincian_jenis_pendapatan,
+                'uraian_retribusi' => $data->uraian_retribusi,
+                'nmr_rekening' => $data->rincian_jenis->nmr_rekening,
+                'nmr_rekening_denda' => $data->rincian_jenis->nmr_rekening_denda,
+                'nama_ttd' => $data->nm_ttd,
+                'nip_ttd' => $data->nip_ttd,
+                'tgl_ttd' => $data->tgl_ttd,
+                'nmr_daftar' => $data->nmr_daftar,
+                'nama_wr' => $data->nm_wajib_pajak,
+                'alamat_wr' => $data->alamat_wp,
+                'kecamatan' => $data->kecamatan->n_kecamatan,
+                'kelurahan' => $data->kelurahan->n_kelurahan,
+                'lokasi' => $data->lokasi,
+                'tgl_skrd' => $data->tgl_skrd_awal,
+                'jatuh_tempo' => $data->tgl_skrd_akhir,
+                'no_skrd' => $data->no_skrd,
+                'no_bayar' => $data->no_bayar,
+                'ketetapan' => $data->jumlah_bayar,
+                'denda' => $data->denda,
+                'diskon' => $data->diskon,
+                'total_bayar' => $data->total_bayar,
+                'nomor_va_bjb' => $data->nomor_va_bjb,
+                'status_ttd' => $data->status_ttd,
+                'text_qris' => $data->text_qris,
+                'status_bayar' => $data->status_bayar,
+                'invoice_id' => $data->invoice_id,
+                'created_by' => $data->created_by
+            ];
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Success',
+                'data'   => $dataResponse
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function showPDFSTS($no_bayar)
+    {
+        try {
+            $data = TransaksiOPD::whereno_bayar($no_bayar)->first();
+
+            //* Check Data
+            if ($data == null)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'Error, Data nomor bayar tidak ditemukan.',
+                ], 404);
+
+            //* Check TTD
+            if ($data->status_ttd == 2 || $data->status_ttd == 4 || $data->status_ttd == 0)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'File SKRD belum ditanda tangan.',
+                ], 404);
+
+            //* Check status bayar
+            if ($data->status_bayar == 0)
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'SKRD belum dibayar.',
+                ], 404);
+
+            $fileName = str_replace(' ', '', $data->nm_wajib_pajak) . '-' . $data->no_skrd . ".pdf";
+            $link = 'https://dataawan.tangerangselatankota.go.id/retribusi/file_ttd_skrd/' . $fileName;
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Success',
+                'data'   => $link
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
 }
