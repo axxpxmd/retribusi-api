@@ -39,7 +39,7 @@ class CallBackController extends Controller
     /**
      ** Callback for payment with VA (virtual account)
      */
-    public function callBack(Request $request)
+    public function callBackVA(Request $request)
     {
         //* Get params
         $status    = $request->status;
@@ -56,7 +56,7 @@ class CallBackController extends Controller
         //TODO: LOG
         LOG::channel('va')->info('status:' . $status . ' | ' . 'va number:' . $va_number . ' | ' . 'client refnum:' . $client_refnum . ' | ' . 'transaction time:' . $transaction_time . ' | ' . 'transaction amount:' . $transaction_amount);
 
-        //TODO: Check Status (status must 2)
+        //* Check Status (status must 2)
         if ($status != 2) {
             $status = [
                 'status'  => 404,
@@ -70,7 +70,7 @@ class CallBackController extends Controller
         }
 
         try {
-            //TODO: Check IP
+            //* Check IP
             if ($ip == $ipBJB || $ip != $ipBJB2 || $ip != $ipKMNF) {
                 $where = [
                     'nomor_va_bjb' => $va_number,
@@ -107,7 +107,7 @@ class CallBackController extends Controller
                     'total_bayar_bjb' => $transaction_amount
                 ]);
 
-                //*
+                //* Forward callback from BJB to Client
                 if ($data->userApi != null) {
                     $url = $data->userApi->url_callback;
                     $reqBody = [
@@ -116,7 +116,7 @@ class CallBackController extends Controller
                         'waktu_bayar'   => $transaction_time,
                         'jumlah_bayar'  => $transaction_amount,
                         'status_bayar'  => 1,
-                        'channel_bayar' => 'BJB Virtual Account'
+                        'channel_bayar' => 'Virtual Account'
                     ];
                     dispatch(new CallbackJob($reqBody, $url));
                 }
@@ -200,7 +200,7 @@ class CallBackController extends Controller
             $transcationStatus    = $request->transcationStatus;
             $transactionReference = $request->transactionReference;
 
-            //TODO: Check type
+            //* Check type
             if ($type != 'TRANSACTION') {
                 $status = [
                     'status'  => 422,
@@ -267,6 +267,20 @@ class CallBackController extends Controller
                 list($err, $errMsg, $VABJB) = $this->vabjbres->updateVABJBres($tokenBJB, $amount, $expiredDate, $customerName, $va_number, 1, $clientRefnum);
             }
 
+            //* Forward callback from BJB to Client
+            if ($data->userApi != null) {
+                $url = $data->userApi->url_callback;
+                $reqBody = [
+                    'nomor_va_bjb'  => $va_number,
+                    'no_bayar'      => $data->no_bayar,
+                    'waktu_bayar'   => Carbon::createFromFormat('d/m/Y H:i:s', $transactionDate)->format('Y-m-d H:i:s'),
+                    'jumlah_bayar'  => $transactionAmount,
+                    'status_bayar'  => 1,
+                    'channel_bayar' => 'QRIS | ' . $customerName
+                ];
+                dispatch(new CallbackJob($reqBody, $url));
+            }
+
             //* Sent callback to Tangselpay
             $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-qris';
             $reqBodyTangselPay = [
@@ -290,7 +304,7 @@ class CallBackController extends Controller
                     'ntb'  => $rrn,
                     'data' => $data,
                     'tgl_bayar'       => Carbon::createFromFormat('d/m/Y H:i:s', $transactionDate)->format('Y-m-d H:i:s'),
-                    'chanel_bayar'    => 'BJB Virtual Account',
+                    'chanel_bayar'    => 'QRIS | ' . $customerName,
                     'total_bayar_bjb' => $transactionAmount,
                 ];
                 dispatch(new WhatsAppJob($params));

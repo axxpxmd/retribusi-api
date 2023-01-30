@@ -17,26 +17,20 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-//* Auth
+//* --------------------- BJB ---------------------- *//
 $router->group(['prefix' => 'auth', 'namespace' => 'Auth'], function () use ($router) {
     $router->post('login', 'AuthController@login');
 });
 
-//* --------------------- BJB ---------------------- *//
 $router->group(['middleware' => 'auth', 'namespace' => 'BJB'], function () use ($router) {
-    // Invoice
     $router->get('invoice', 'InvoiceController@checkNoBayar');
     $router->get('invoice/{no_bayar}', 'InvoiceController@invoice');
     $router->put('invoice/update/{id}', 'InvoiceController@update');
 });
 
-// Callback VA
-$router->post('callback', 'BJB\CallBackController@callBack');
-
-// Callback QRIS
+$router->post('callback', 'BJB\CallBackController@callBackVA');
 $router->post('callback-qris', 'BJB\CallBackController@callbackQRIS');
 
-// Show No Bayar
 $router->get('no-bayar/{no_bayar}', 'Client\SKRDController@showNoBayar');
 $router->get('bukti-sts/{no_bayar}', 'Client\SKRDController@showPDFSTS');
 
