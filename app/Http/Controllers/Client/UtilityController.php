@@ -32,16 +32,12 @@ class UtilityController extends Controller
 {
     use ResponseAction;
 
-    public function __construct(Helper $helper)
-    {
-        $this->helper = $helper;
-    }
-
     public function getJenisPendapatan(Request $request)
     {
-        //* Check Api Key
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
+
+        //* Check Api Key
         if (!$api_key || !$user) {
             return $this->failure('Invalid API Key!', 422);
         }
@@ -70,9 +66,10 @@ class UtilityController extends Controller
 
     public function getRincianPendapatan(Request $request, $jenis_pendapatan_id)
     {
-        //* Check Api Key
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
+
+        //* Check Api Key
         if (!$api_key || !$user) {
             return $this->failure('Invalid API Key!', 422);
         }
@@ -80,9 +77,9 @@ class UtilityController extends Controller
         try {
             //* Check jenis_pendapatan_id
             $opd_id = $user->opd_id;
-            $checkJenisPendapatan = $this->helper->checkExistedJenisPendapatan($opd_id, $jenis_pendapatan_id);
+            $checkJenisPendapatan = RincianJenisPendapatan::checkExistedJenisPendapatan($opd_id, $jenis_pendapatan_id);
             if (!$checkJenisPendapatan) {
-                $message = 'jenis_pendapatan_id tidak sesuai.';
+                $message = 'parameter jenis_pendapatan_id tidak sesuai.';
                 return $this->failure($message, 422);
             }
 
@@ -91,10 +88,10 @@ class UtilityController extends Controller
             $datas = [];
             foreach ($rincian_pendapatans as $key => $i) {
                 $datas[$key] = [
-                    'id' => $i->id,
+                    'id'       => $i->id,
                     'kd_jenis' => $i->kd_jenis,
                     'rincian_pendapatan' => $i->rincian_pendapatan,
-                    'nmr_rekening' => $i->nmr_rekening,
+                    'nmr_rekening'       => $i->nmr_rekening,
                     'nmr_rekening_denda' => $i->nmr_rekening_denda
                 ];
             }
@@ -113,6 +110,8 @@ class UtilityController extends Controller
     {
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
+
+        //* Check Api Key
         if (!$api_key || !$user) {
             return $this->failure('Invalid API Key!', 422);
         }
@@ -144,6 +143,8 @@ class UtilityController extends Controller
     {
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
+
+        //* Check Api Key
         if (!$api_key || !$user) {
             return $this->failure('Invalid API Key!', 422);
         }
@@ -165,6 +166,8 @@ class UtilityController extends Controller
     {
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
+
+        //* Check Api Key
         if (!$api_key || !$user) {
             return $this->failure('Invalid API Key!', 422);
         }

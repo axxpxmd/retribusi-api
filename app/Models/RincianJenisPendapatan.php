@@ -13,4 +13,15 @@ class RincianJenisPendapatan extends Model
     {
         return $this->belongsTo(JenisPendapatan::class, 'id_jenis_pendapatan');
     }
+
+    public static function checkExistedJenisPendapatan($opd_id, $jenis_pendapatan_id)
+    {
+        $jenis_pendapatans = OPDJenisPendapatan::getJenisPendapatanByOpd($opd_id);
+
+        if (in_array($jenis_pendapatan_id, $jenis_pendapatans->pluck('id')->toArray())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
