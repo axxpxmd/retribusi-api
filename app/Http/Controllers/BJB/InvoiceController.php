@@ -182,7 +182,7 @@ class InvoiceController extends Controller
             ], 200);
         } catch (\Throwable $th) {
             //TODO: LOG ERROR
-            LOG::channel('atm')->error($th->getMessage(), ['id' => $id]);
+            LOG::channel('atm')->error($th->getMessage(), ['no_bayar' => $data->no_bayar]);
 
             return response()->json([
                 'status' => 500,

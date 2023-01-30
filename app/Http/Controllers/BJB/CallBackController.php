@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
-use App\Http\Services\VABJB;
+use App\Http\Services\VABJBRes;
 use App\Http\Controllers\Controller;
 
 // Queque
@@ -31,9 +31,9 @@ use App\Models\TransaksiOPD;
 
 class CallBackController extends Controller
 {
-    public function __construct(VABJB $vabjb)
+    public function __construct(VABJBRes $vabjbres)
     {
-        $this->vabjb = $vabjb;
+        $this->vabjbres = $vabjbres;
     }
 
     /**
@@ -127,7 +127,7 @@ class CallBackController extends Controller
                         'ntb'  => md5($client_refnum),
                         'data' => $data,
                         'tgl_bayar'       => $transaction_time,
-                        'chanel_bayar'    => 'BJB Virtual Account',
+                        'chanel_bayar'    => 'Virtual Account',
                         'total_bayar_bjb' => $transaction_amount,
                     ];
                     dispatch(new WhatsAppJob($params));
@@ -166,28 +166,23 @@ class CallBackController extends Controller
     }
 
     /**
-     * Payment with BJB QRIS
+     ** Callback for payment with QRIS
      */
     public function callbackQRIS(Request $request)
     {
         //TODO: LOG INFO
         LOG::channel('qris')->info('invoiceID:' . $request->invoiceNumber . ' | ' . 'type:' . $request->type . ' | ' . 'transaction date:' . $request->transactionDate . ' | ' . 'transaction amount:' . $request->transactionAmount . ' | ' . 'customer name:' . $request->customerName . ' | ' . 'rrn:' . $request->rrn);
 
-        return response()->json([
-            'status'  => 404,
-            'message' => 'Error. TB'
-        ], 404);
-
         $this->validate($request, [
-            'transactionDate' => 'required',
-            'transactionAmount' => 'required',
-            // 'customerName' => 'required',
-            'invoiceNumber' => 'required'
+            'invoiceNumber'     => 'required',
+            'transactionDate'   => 'required',
+            'transactionAmount' => 'required'
         ]);
 
         /* Tahapan :
-         *  1. tmtransaksi_opd
+         *  1. tmtransaksi_opd (update)
          *  2. Make VA Expired
+         *  3. Send invoice from Whatsapp
          */
 
         try {
@@ -195,15 +190,15 @@ class CallBackController extends Controller
 
             //* Get Params
             $type = $request->type;
-            $transactionDate = $request->transactionDate;
-            $transactionAmount = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transactionAmount);
-            $customerName = $request->customerName;
-            $invoiceNumber = $request->invoiceNumber;
-            $rrn = $request->rrn;
-            $merchantName = $request->merchantName;
-            $transcationStatus = $request->transcationStatus;
-            $transactionReference = $request->transactionReference;
+            $rrn  = $request->rrn;
+            $customerName    = $request->customerName;
+            $merchantName    = $request->merchantName;
+            $invoiceNumber   = $request->invoiceNumber;
             $merchantBalance = $request->merchantBalance;
+            $transactionDate      = $request->transactionDate;
+            $transactionAmount    = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transactionAmount);
+            $transcationStatus    = $request->transcationStatus;
+            $transactionReference = $request->transactionReference;
 
             //TODO: Check type
             if ($type != 'TRANSACTION') {
@@ -218,9 +213,8 @@ class CallBackController extends Controller
                 return response()->json($status, 422);
             }
 
-            //* Tahap 1
             $data = TransaksiOPD::where('invoice_id', $invoiceNumber)->first();
-            if ($data == null) {
+            if (!$data) {
                 $status = [
                     'status'  => 422,
                     'message' => 'Nomor invoice tidak ditemukan.',
@@ -232,7 +226,7 @@ class CallBackController extends Controller
                 return response()->json($status, 404);
             }
 
-            //TODO: Cek Status Bayar
+            //* Cek Status Bayar
             if ($data->status_bayar == 1) {
                 $statuCode = $data->ntb == $rrn ? 200 : 404;
                 $status = [
@@ -240,21 +234,67 @@ class CallBackController extends Controller
                     'message' => 'Data ini sudah dibayar menggunakan ' . $data->chanel_bayar,
                 ];
 
-                //TODO: LOG ERROR
-                LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
+                if ($statuCode == 404) {
+                    //TODO: LOG ERROR
+                    LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
+                }
 
                 return response()->json($status, $statuCode);
             }
 
-            //TODO: Update Data
+            //* Tahap 1
             $data->update([
-                'ntb' => $rrn,
+                'ntb'        => $rrn,
                 'tgl_bayar'  => Carbon::createFromFormat('d/m/Y H:i:s', $transactionDate)->format('Y-m-d H:i:s'),
                 'updated_by' => 'BJB From API Callback',
-                'status_bayar' => 1,
-                'chanel_bayar' => 'QRIS | ' . $customerName,
+                'status_bayar'    => 1,
+                'chanel_bayar'    => 'QRIS | ' . $customerName,
                 'total_bayar_bjb' => $transactionAmount
             ]);
+
+            //* Tahap 2
+            $amount       = \strval((int) str_replace(['.', 'Rp', ' '], '', $data->jumlah_bayar));
+            $customerName = $data->nm_wajib_pajak;
+            $va_number    = (int) $data->nomor_va_bjb;
+            $clientRefnum = $data->no_bayar;
+            $expiredDate  = Carbon::now()->addMinutes(20)->format('Y-m-d H:i:s');
+
+            if ($va_number) {
+                //TODO: Get Token VA
+                list($err, $errMsg, $tokenBJB) = $this->vabjbres->getTokenBJBres(2);
+
+                //TODO: Update VA BJB (make Va expired)
+                list($err, $errMsg, $VABJB) = $this->vabjbres->updateVABJBres($tokenBJB, $amount, $expiredDate, $customerName, $va_number, 1, $clientRefnum);
+            }
+
+            //* Sent callback to Tangselpay
+            $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-qris';
+            $reqBodyTangselPay = [
+                'type' => $type,
+                'rrn'  => $rrn,
+                'customerName'    => $customerName,
+                'invoiceNumber'   => $invoiceNumber,
+                'merchantName'    => $merchantName,
+                'transactionDate' => $transactionDate,
+                'merchantBalance' => $merchantBalance,
+                'transactionStatus'    => $transcationStatus,
+                'transactionAmount'    => $transactionAmount,
+                'transactionReference' => $transactionReference,
+            ];
+            // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
+
+
+            //* Tahap 3
+            if ($data->no_telp) {
+                $params = [
+                    'ntb'  => $rrn,
+                    'data' => $data,
+                    'tgl_bayar'       => Carbon::createFromFormat('d/m/Y H:i:s', $transactionDate)->format('Y-m-d H:i:s'),
+                    'chanel_bayar'    => 'BJB Virtual Account',
+                    'total_bayar_bjb' => $transactionAmount,
+                ];
+                dispatch(new WhatsAppJob($params));
+            }
 
             $status = [
                 'code' => 200,
@@ -262,65 +302,8 @@ class CallBackController extends Controller
                 'datetime' => $time->format('Y-m-d') . 'T' . $time->format('H:i:s')
             ];
 
-            //* Tahap 2
-            $amount = $data->total_bayar;
-            $customerName = $data->nm_wajib_pajak;
-            $va_number    = (int) $data->nomor_va_bjb;
-
-            $expiredDateAddMinute = Carbon::createFromFormat('d/m/Y H:i:s', $transactionDate)->format('Y-m-d H:i:s');
-            $expiredDateAddMinute = Carbon::parse($expiredDateAddMinute);
-            $expiredDateAddMinute->addMinutes(5);
-            $expiredDate = $expiredDateAddMinute->format('Y-m-d H:i:s');
-
-            //TODO: Get Token BJB
-            // if ($data->nomor_va_bjb) {
-            //     $resGetTokenBJB = $this->vabjb->getTokenBJB();
-            //     if ($resGetTokenBJB->successful()) {
-            //         $resJson = $resGetTokenBJB->json();
-            //         if ($resJson['rc'] != 0000)
-            //             return response()->json([
-            //                 'message' => 'Terjadi kegagalan saat mengambil token. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
-            //             ], 422);
-            //         $tokenBJB = $resJson['data'];
-            //     } else {
-            //         return response()->json([
-            //             'message' => "Terjadi kegagalan saat mengambil token. Error Code " . $resGetTokenBJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
-            //         ], 422);
-            //     }
-
-            //     //TODO: Update VA BJB
-            //     $resUpdateVABJB = $this->vabjb->updateVaBJB($tokenBJB, $amount, $expiredDate, $customerName, $va_number);
-            //     if ($resUpdateVABJB->successful()) {
-            //         $resJson = $resUpdateVABJB->json();
-            //         if (isset($resJson['rc']) != 0000)
-            //             return response()->json([
-            //                 'message' => 'Terjadi kegagalan saat memperbarui Virtual Account. Error Code : ' . $resJson['rc'] . '. Message : ' . $resJson['message'] . ''
-            //             ], 422);
-            //     } else {
-            //         return response()->json([
-            //             'message' => "Terjadi kegagalan saat memperbarui Virtual Account. Error Code " . $resUpdateVABJB->getStatusCode() . ". Silahkan laporkan masalah ini pada administrator"
-            //         ], 422);
-            //     }
-            // }
-
             //TODO: LOG INFO
             LOG::channel('qris')->info('invoiceID:' . $invoiceNumber . ' | ', $status);
-
-            //* Sent callback to Tangselpay
-            $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-qris';
-            $reqBodyTangselPay = [
-                'type' => $type,
-                'merchantName' => $merchantName,
-                'transactionDate' => $transactionDate,
-                'transactionStatus' => $transcationStatus,
-                'transactionAmount' => $transactionAmount,
-                'transactionReference' => $transactionReference,
-                'merchantBalance' => $merchantBalance,
-                'customerName' => $customerName,
-                'invoiceNumber' => $invoiceNumber,
-                'rrn' => $rrn
-            ];
-            // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
 
             return response()->json([
                 'metadata'  => null,

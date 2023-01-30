@@ -17,6 +17,9 @@ class VABJBRes
             case 1:
                 $log = 'Get Token (update invoice)';
                 break;
+            case 2:
+                $log = 'Get Token (callbackQRIS)';
+                break;
             default:
                 # code...
                 break;
@@ -102,6 +105,9 @@ class VABJBRes
         switch ($jenis) {
             case 1:
                 $log = 'Update VA (update invoice - make VA expired)';
+                break;
+            case 2:
+                $log = 'Update VA (callbackQRIS - make VA expired)';
                 break;
             default:
                 # code...
