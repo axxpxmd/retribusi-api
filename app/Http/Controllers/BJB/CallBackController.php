@@ -74,7 +74,7 @@ class CallBackController extends Controller
             //TODO: LOG ERROR
             LOG::channel('va')->error('No Bayar:' . $client_refnum . ' | ', $status);
 
-            //* Save log to table
+            //* Save log to table (Error)
             TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
 
             return response()->json($status, 404);
@@ -96,7 +96,7 @@ class CallBackController extends Controller
                         'message' => 'Error, Data tidak ditemukan.'
                     ];
 
-                    //* Save log to table
+                    //* Save log to table (Error)
                     TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
 
                     return response()->json($status, 404);
@@ -112,8 +112,8 @@ class CallBackController extends Controller
                     //TODO: LOG ERROR
                     LOG::channel('va')->error('No Bayar:' . $client_refnum . ' | ', $status);
 
-                    //* Save log to table
-                    TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
+                    //* Save log to table (Error)
+                    TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id]));
 
                     return response()->json($status, 404);
                 }
@@ -164,18 +164,21 @@ class CallBackController extends Controller
                 ];
                 // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay)); // belum dipake
 
-                //* Save log to table
-                TableLog::storeLog($paramsLog);
+
+                $status = [
+                    'response_code'    => 0000,
+                    'response_message' => 'Success',
+                ];
+
+                //* Save log to table (Success)
+                TableLog::storeLog(array_merge($paramsLog, ['status' => 1, 'msg_log' => $status, 'id_retribusi' => $data->id]));
 
                 return response()->json([
                     'response_code'    => 0000,
                     'response_message' => 'Success',
                 ]);
             } else {
-                return response()->json([
-                    'status'  => 401,
-                    'message' => 'Error, Akses ditolak: ' . $ip,
-                ], 401);
+                return response()->json($status);
             }
         } catch (\Throwable $th) {
             //TODO: LOG ERROR
@@ -222,6 +225,13 @@ class CallBackController extends Controller
             $transactionAmount    = (int) str_replace(['.', 'Rp', ' ', ','], '', $request->transactionAmount);
             $transcationStatus    = $request->transcationStatus;
             $transactionReference = $request->transactionReference;
+
+            $paramsLog = [
+                'ntb'      => $rrn,
+                'no_bayar' => null,
+                'jenis'    => 'Virtual Account',
+                'id_retribusi' => null,
+            ];
 
             //* Check type
             if ($type != 'TRANSACTION') {
