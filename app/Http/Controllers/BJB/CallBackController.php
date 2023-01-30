@@ -229,7 +229,7 @@ class CallBackController extends Controller
             $paramsLog = [
                 'ntb'      => $rrn,
                 'no_bayar' => null,
-                'jenis'    => 'Virtual Account',
+                'jenis'    => 'QRIS',
                 'id_retribusi' => null,
             ];
 
@@ -239,6 +239,9 @@ class CallBackController extends Controller
                     'status'  => 422,
                     'message' => 'type harus berisi TRANSACTION',
                 ];
+
+                //* Save log to table (Error)
+                TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
 
                 //TODO: LOG ERROR
                 LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
@@ -252,6 +255,9 @@ class CallBackController extends Controller
                     'status'  => 422,
                     'message' => 'Nomor invoice tidak ditemukan.',
                 ];
+
+                //* Save log to table (Error)
+                TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
 
                 //TODO: LOG ERROR
                 LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
@@ -270,6 +276,9 @@ class CallBackController extends Controller
                 if ($statuCode == 404) {
                     //TODO: LOG ERROR
                     LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
+
+                    //* Save log to table (Error)
+                    TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id, 'no_bayar' => $data->no_bayar]));
                 }
 
                 return response()->json($status, $statuCode);
@@ -297,7 +306,7 @@ class CallBackController extends Controller
                 list($err, $errMsg, $tokenBJB) = $this->vabjbres->getTokenBJBres(2);
 
                 //TODO: Update VA BJB (make Va expired)
-                list($err, $errMsg, $VABJB) = $this->vabjbres->updateVABJBres($tokenBJB, $amount, $expiredDate, $customerName, $va_number, 1, $clientRefnum);
+                list($err, $errMsg, $VABJB) = $this->vabjbres->updateVABJBres($tokenBJB, $amount, $expiredDate, $customerName, $va_number, 2, $clientRefnum);
             }
 
             //* Forward callback from BJB to Client
@@ -352,9 +361,12 @@ class CallBackController extends Controller
             //TODO: LOG INFO
             LOG::channel('qris')->info('invoiceID:' . $invoiceNumber . ' | ', $status);
 
+            //* Save log to table (Sucess)
+            TableLog::storeLog(array_merge($paramsLog, ['status' => 1, 'msg_log' => $status, 'id_retribusi' => $data->id, 'no_bayar' => $data->no_bayar]));
+
             return response()->json([
                 'metadata'  => null,
-                'status' => $status,
+                'status'    => $status,
             ]);
         } catch (\Throwable $th) {
             //TODO: LOG ERROR
