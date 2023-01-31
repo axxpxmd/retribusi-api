@@ -109,11 +109,13 @@ class CallBackController extends Controller
                         'message' => 'Data ini sudah dibayar menggunakan ' . $data->chanel_bayar,
                     ];
 
-                    //TODO: LOG ERROR
-                    LOG::channel('va')->error('No Bayar:' . $client_refnum . ' | ', $status);
+                    if ($data->chanel_bayar != 'Virtual Account') {
+                        //TODO: LOG ERROR
+                        LOG::channel('va')->error('No Bayar:' . $client_refnum . ' | ', $status);
 
-                    //* Save log to table (Error)
-                    TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id]));
+                        //* Save log to table (Error)
+                        TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id]));
+                    }
 
                     return response()->json($status, 404);
                 }
