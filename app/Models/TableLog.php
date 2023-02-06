@@ -14,6 +14,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class TableLog extends Model
@@ -29,6 +30,7 @@ class TableLog extends Model
         $status   = $params['status'];
         $jenis    = $params['jenis'];
         $id_retribusi = $params['id_retribusi'];
+        $waktu = Carbon::now()->format('Y-m-d H:i:s');
 
         $data = TableLog::where('no_bayar', $no_bayar)->first();
         $dataInput = [
@@ -38,6 +40,7 @@ class TableLog extends Model
             'status'   => $status,
             'jenis'    => $jenis,
             'id_retribusi' => $id_retribusi,
+            'waktu' => $waktu
         ];
         if (!$data) {
             TableLog::create($dataInput);
