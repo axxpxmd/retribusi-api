@@ -30,12 +30,14 @@ class TableLog extends Model
         $status   = $params['status'];
         $jenis    = $params['jenis'];
         $id_retribusi = $params['id_retribusi'];
+        $params_req   = $params['params_req'];
         $waktu = Carbon::now()->format('Y-m-d H:i:s');
 
         $data = TableLog::where('no_bayar', $no_bayar)->first();
         $dataInput = [
             'ntb' => $ntb,
-            'msg_log'  => json_encode($msg_log),
+            'msg_log'    => json_encode($msg_log),
+            'params_log' => $params_req,
             'no_bayar' => $no_bayar,
             'status'   => $status,
             'jenis'    => $jenis,

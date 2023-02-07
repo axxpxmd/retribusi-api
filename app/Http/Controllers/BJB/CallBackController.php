@@ -59,6 +59,7 @@ class CallBackController extends Controller
             'no_bayar' => $client_refnum,
             'jenis'    => 'Virtual Account',
             'id_retribusi' => null,
+            'params_req' => json_encode($request->all())
         ];
 
         //TODO: LOG
@@ -233,6 +234,7 @@ class CallBackController extends Controller
                 'no_bayar' => null,
                 'jenis'    => 'QRIS',
                 'id_retribusi' => null,
+                'params_req'   => json_encode($request->all())
             ];
 
             //* Check type
