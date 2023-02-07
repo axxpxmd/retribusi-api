@@ -16,7 +16,9 @@ class WhatsApp
         $link = $url_retribusi . base64_encode($data->id) . "?send_sts=1";
 
         //* Send message to WA
-        $text = "*TRANSAKSI BERHASIL* 
+        $text = "*PEMBAYARAN RETRIBUSI BERHASIL* 
+
+Untuk *" . $data->rincian_jenis->rincian_pendapatan . "*
 
 *Tanggal Bayar* : " . Carbon::parse($tgl_bayar)->format('d F Y | H:i:s') . "
 *Nomor Transaksi* : " . $ntb . "
