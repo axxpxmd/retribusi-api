@@ -269,21 +269,19 @@ class CallBackController extends Controller
 
             //* Cek Status Bayar
             if ($data->status_bayar == 1) {
-                $statuCode = $data->ntb == $rrn ? 200 : 404;
                 $status = [
-                    'status'  => $statuCode,
+                    'status'  => 200,
                     'message' => 'Data ini sudah dibayar menggunakan ' . $data->chanel_bayar,
                 ];
 
-                if ($statuCode == 404) {
-                    //TODO: LOG ERROR
-                    LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
+                //TODO: LOG ERROR
+                LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
 
-                    //* Save log to table (Error)
-                    TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id, 'no_bayar' => $data->no_bayar]));
-                }
+                //* Save log to table (Error)
+                TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id, 'no_bayar' => $data->no_bayar]));
 
-                return response()->json($status, $statuCode);
+
+                return response()->json($status, 200);
             }
 
             //* Tahap 1
