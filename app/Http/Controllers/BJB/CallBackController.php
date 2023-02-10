@@ -270,7 +270,7 @@ class CallBackController extends Controller
             }
 
             //* Cek Status Bayar
-            if ($data->status_bayar == 1) {
+            if ($data->status_bayar == 1 && $data->ntb != $rrn) {
                 $status = [
                     'status'  => 200,
                     'message' => 'Data ini sudah dibayar menggunakan ' . $data->chanel_bayar,
