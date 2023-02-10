@@ -270,9 +270,11 @@ class CallBackController extends Controller
             }
 
             //* Cek Status Bayar
-            if ($data->status_bayar == 1 && $data->ntb != $rrn) {
+            if ($data->status_bayar == 1) {
+                $statuCode = $data->ntb == $rrn ? 200 : 404;
+
                 $status = [
-                    'status'  => 200,
+                    'status'  => $statuCode,
                     'message' => 'Data ini sudah dibayar menggunakan ' . $data->chanel_bayar,
                 ];
 
@@ -282,8 +284,7 @@ class CallBackController extends Controller
                 //* Save log to table (Error)
                 TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id, 'no_bayar' => $data->no_bayar]));
 
-
-                return response()->json($status, 200);
+                return response()->json($status, $statuCode);
             }
 
             //* Tahap 1
