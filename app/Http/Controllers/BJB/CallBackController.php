@@ -282,7 +282,9 @@ class CallBackController extends Controller
                 LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
 
                 //* Save log to table (Error)
-                TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id, 'no_bayar' => $data->no_bayar]));
+                if ($statuCode == 404) {
+                    TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id, 'no_bayar' => $data->no_bayar]));
+                }
 
                 return response()->json($status, $statuCode);
             }
