@@ -25,7 +25,7 @@ class GenerateNumber
 
         //TODO: Generate no_skrd (Data melanjutkan nomor terakhir)
         $totalSKRD = TransaksiOPD::where('id_opd', $opd_id)
-            ->where('id_jenis_pendapatan', $jenis_pendapatan_id)
+            // ->where('id_jenis_pendapatan', $jenis_pendapatan_id)
             ->where(DB::raw('YEAR(created_at)'), '=', $time->year)
             ->orderBy('id', 'DESC')
             ->first();

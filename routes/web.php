@@ -36,6 +36,9 @@ $router->get('bukti-sts/{no_bayar}', 'Client\SKRDController@showPDFSTS');
 
 //* --------------------- Client ------------------- *//
 $router->group(['namespace' => 'Client'], function () use ($router) {
+    // Booking
+    $router->post('booking-create', 'BookingController@createBooking');
+
     // SKRD
     $router->get('skrd', 'SKRDController@index');
     $router->post('skrd', 'SKRDController@store');
@@ -47,4 +50,5 @@ $router->group(['namespace' => 'Client'], function () use ($router) {
     $router->get('penanda-tangan', 'UtilityController@getPenandaTangan');
     $router->get('kecamatan', 'UtilityController@getKecamatan');
     $router->get('kelurahan/{kecamatan_id}', 'UtilityController@getKelurahan');
+    $router->get('opd', 'UtilityController@getOpd');
 });

@@ -21,6 +21,7 @@ use App\Traits\ResponseAction;
 use App\Http\Controllers\Controller;
 
 // Models
+use App\Models\OPD;
 use App\Models\TtdOPD;
 use App\Models\Kecamatan;
 use App\Models\Kelurahan;
@@ -31,6 +32,23 @@ use App\Models\RincianJenisPendapatan;
 class UtilityController extends Controller
 {
     use ResponseAction;
+
+    public function getOpd()
+    {
+        try {
+            $opds = OPD::select('tmopds.id as id', 'n_opd', 'jumlah as kuota')
+                ->join('tm_kuota_bookings', 'tm_kuota_bookings.id_opd', '=', 'tmopds.id')
+                ->where('jumlah', '!=', 0)->get();
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Sukses',
+                'data'    => $opds
+            ], 200);
+        } catch (\Throwable $th) {
+            return $this->failure('Server Error.', 500);
+        }
+    }
 
     public function getJenisPendapatan(Request $request)
     {
