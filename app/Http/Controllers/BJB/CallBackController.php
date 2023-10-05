@@ -141,7 +141,10 @@ class CallBackController extends Controller
                         'status_bayar'  => 1,
                         'channel_bayar' => 'Virtual Account'
                     ];
-                    dispatch(new CallbackJob($reqBody, $url));
+
+                    if ($url) {
+                        dispatch(new CallbackJob($reqBody, $url));
+                    }
                 }
 
                 //* Send invoice from Whatsapp
@@ -325,7 +328,9 @@ class CallBackController extends Controller
                     'status_bayar'  => 1,
                     'channel_bayar' => 'QRIS | ' . $customerName
                 ];
-                dispatch(new CallbackJob($reqBody, $url));
+                if ($url) {
+                    dispatch(new CallbackJob($reqBody, $url));
+                }
             }
 
             //* Sent callback to Tangselpay

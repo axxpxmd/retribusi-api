@@ -21,7 +21,7 @@ class CallbackJob extends Job
         $url = $this->url;
         $reqBody = $this->reqBody;
 
-        $res = Http::get($url, $reqBody);
+        $res = Http::post($url, $reqBody);
 
         $resJson = $res->json();
         if ($res->successful()) {
