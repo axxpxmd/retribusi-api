@@ -266,7 +266,7 @@ class CallBackController extends Controller
                 //TODO: LOG ERROR
                 LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
 
-                return response()->json($status, 404);
+                return response()->json($status, 200);
             }
 
             //* Cek Status Bayar
@@ -286,7 +286,7 @@ class CallBackController extends Controller
                     TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id, 'no_bayar' => $data->no_bayar]));
                 }
 
-                return response()->json($status, $statuCode);
+                return response()->json($status, 200);
             }
 
             //* Tahap 1
