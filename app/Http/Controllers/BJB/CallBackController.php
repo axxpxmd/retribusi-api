@@ -78,7 +78,7 @@ class CallBackController extends Controller
             //* Save log to table (Error)
             TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
 
-            return response()->json($status, 404);
+            return response()->json($status, 200);
         }
 
         try {
@@ -100,7 +100,7 @@ class CallBackController extends Controller
                     //* Save log to table (Error)
                     TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status]));
 
-                    return response()->json($status, 404);
+                    return response()->json($status, 200);
                 }
 
                 //* Chek Status Bayar
@@ -118,7 +118,7 @@ class CallBackController extends Controller
                         TableLog::storeLog(array_merge($paramsLog, ['status' => 2, 'msg_log' => $status, 'id_retribusi' => $data->id]));
                     }
 
-                    return response()->json($status, 404);
+                    return response()->json($status, 200);
                 }
 
                 $data->update([
@@ -250,7 +250,7 @@ class CallBackController extends Controller
                 //TODO: LOG ERROR
                 LOG::channel('qris')->error('invoiceID:' . $invoiceNumber . ' | ', $status);
 
-                return response()->json($status, 422);
+                return response()->json($status, 200);
             }
 
             $data = TransaksiOPD::where('invoice_id', $invoiceNumber)->first();
