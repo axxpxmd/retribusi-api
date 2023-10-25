@@ -104,6 +104,9 @@ class SKRDController extends Controller
 
     public function store(Request $request)
     {
+        //TODO: LOG
+        LOG::channel('skrd_create_parameter')->info($request->all());
+
         $api_key = $request->header('API-Key');
         $user    = UserDetail::where('api_key', $api_key)->first();
 
