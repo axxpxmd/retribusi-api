@@ -132,9 +132,9 @@ class SKRDController extends Controller
             'id_rincian_jenis_pendapatan' => 'required',
         ]);
 
-        /* Tahapan : 
+        /* Tahapan :
          * 1. Generate Nomor (no_skrd & no_bayar)
-         * 2. tmtransaksi_opd 
+         * 2. tmtransaksi_opd
          * 3. Create Virtual Account
          * 4. Create QRIS
          * 5. tmdata_wp
@@ -429,6 +429,7 @@ class SKRDController extends Controller
                 'text_qris' => $data->text_qris,
                 'status_bayar' => $data->status_bayar,
                 'invoice_id' => $data->invoice_id,
+                'tgl_bayar' => $data->tgl_bayar,
                 'created_by' => $data->created_by
             ];
 
