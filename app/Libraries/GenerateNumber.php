@@ -12,6 +12,7 @@ class GenerateNumber
 {
     public static function generate($opd_id, $jenis_pendapatan_id, $jenisGenerate)
     {
+        dd($opd_id, $jenis_pendapatan_id, $jenisGenerate);
         $time  = carbon::now();
         $month = $time->month;
         $year  = substr($time->year, 2);
