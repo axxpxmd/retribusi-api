@@ -159,17 +159,6 @@ class CallBackController extends Controller
                     dispatch(new WhatsAppJob($params));
                 }
 
-                //* Sent callback to Tangselpay
-                $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-va';
-                $reqBodyTangselPay = [
-                    'status'        => $status,
-                    'va_number'     => $va_number,
-                    'client_refnum' => $client_refnum,
-                    'transaction_time'   => $transaction_time,
-                    'transaction_amount' => $transaction_amount
-                ];
-                // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay)); // belum dipake
-
                 $status = [
                     'response_code'    => 0000,
                     'response_message' => 'Success',
@@ -331,23 +320,6 @@ class CallBackController extends Controller
                     dispatch(new CallbackJob($reqBody, $url));
                 }
             }
-
-            //* Sent callback to Tangselpay
-            $urlTangselPay = 'http://192.168.200.160/v1/intern/callback-qris';
-            $reqBodyTangselPay = [
-                'type' => $type,
-                'rrn'  => $rrn,
-                'customerName'    => $customerName,
-                'invoiceNumber'   => $invoiceNumber,
-                'merchantName'    => $merchantName,
-                'transactionDate' => $transactionDate,
-                'merchantBalance' => $merchantBalance,
-                'transactionStatus'    => $transcationStatus,
-                'transactionAmount'    => $transactionAmount,
-                'transactionReference' => $transactionReference,
-            ];
-            // dispatch(new TangselPayCallbackJob($reqBodyTangselPay, $urlTangselPay));
-
 
             //* Tahap 3
             if ($data->no_telp) {
