@@ -156,7 +156,7 @@ class CallBackController extends Controller
                         'chanel_bayar'    => 'Virtual Account',
                         'total_bayar_bjb' => $transaction_amount,
                     ];
-                    dispatch(new WhatsAppJob($params),);
+                    dispatch(new WhatsAppJob($params));
                 }
 
                 //* Sent callback to Tangselpay
