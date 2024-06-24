@@ -21,17 +21,12 @@ class CallbackJob extends Job
         $url = $this->url;
         $reqBody = $this->reqBody;
 
-        $res = Http::post($url, $reqBody);
+        $res = Http::asForm()->post($url, $reqBody);
 
-        $resJson = $res->json();
         if ($res->successful()) {
-            if ($resJson['status'] == 200) {
-                echo 'berhasil';
-            } else {
-                echo $resJson['status'] . ' Error, status code tidak sesuai';
-            }
+            echo 'Berhasil';
         } else {
-            echo 'gagal kirim callback';
+            echo 'Gagal';
         }
     }
 }
