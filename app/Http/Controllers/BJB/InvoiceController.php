@@ -18,6 +18,7 @@ use App\Http\Services\VABJBRes;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 // Queque
@@ -25,8 +26,8 @@ use App\Jobs\CallbackJob;
 use App\Jobs\WhatsAppJob;
 
 // Models
+use App\Models\Utility;
 use App\Models\TransaksiOPD;
-use Illuminate\Support\Carbon;
 
 class InvoiceController extends Controller
 {
@@ -49,6 +50,33 @@ class InvoiceController extends Controller
                     'message' => 'Data nomor bayar tidak ditemukan.'
                 ], 404);
 
+            //* Check jatuh tempo
+            $tgl_skrd_akhir = $data->tgl_strd_akhir ? $data->tgl_strd_akhir : $data->tgl_skrd_akhir;
+            $dateNow = Carbon::now()->format('Y-m-d');
+            $skrd_kadaluarsa = Utility::isJatuhTempo($tgl_skrd_akhir, $dateNow);
+
+            if ($skrd_kadaluarsa === true)
+                return response()->json([
+                    'status'  => 402,
+                    'message' => 'SKRD sudah tidak berlaku, Silahkan hubungi dinas terkait untuk diperbaharui.'
+                ], 402);
+
+            //* Check TTD
+            $status_ttd = Utility::checkStatusTTD($data->status_ttd);
+            if ($status_ttd === false)
+                return response()->json([
+                    'status'  => 402,
+                    'message' => 'SKRD belum berlaku, Silahkan hubungi dinas terkait untuk ditandatangani.'
+                ], 402);
+
+            //* Check Denda
+            $isJatuhTempo = Utility::isJatuhTempo($data->tgl_skrd_akhir, $dateNow);
+            if ($isJatuhTempo === true) {
+                $tgl_skrd_akhir = $data->tgl_skrd_akhir;
+                $total_bayar    = $data->jumlah_bayar;
+                list($jumlahBunga, $kenaikan) = Utility::createBunga($tgl_skrd_akhir, $total_bayar);
+            }
+
             $data = array(
                 'id'     => \base64_encode($data->id),
                 'alamat' => $data->alamat_wp,
@@ -67,6 +95,8 @@ class InvoiceController extends Controller
                 'no_skrd'          => $data->no_skrd,
                 'tgl_skrd_awal'    => $data->tgl_skrd_awal,
                 'tgl_skrd_akhir'   => $data->tgl_skrd_akhir,
+                'tgl_strd_akhir'   => $data->tgl_strd_akhir,
+                'denda'            => $isJatuhTempo === true ? "$jumlahBunga" : "0",
                 'status_denda'     => $data->status_denda,
                 'status_bayar'     => $data->status_bayar
             );
