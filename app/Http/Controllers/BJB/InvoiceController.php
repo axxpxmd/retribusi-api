@@ -97,6 +97,7 @@ class InvoiceController extends Controller
                 'tgl_skrd_akhir'   => $data->tgl_skrd_akhir,
                 'tgl_strd_akhir'   => $data->tgl_strd_akhir,
                 'denda'            => $isJatuhTempo === true ? \strval((int) str_replace([','], '', number_format($jumlahBunga))) : "0",
+                'kenaikan_denda'   => $isJatuhTempo === true ? $kenaikan . '%' : null,
                 'status_denda'     => $data->status_denda,
                 'status_bayar'     => $data->status_bayar
             );
