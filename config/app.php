@@ -27,6 +27,7 @@ return [
     'wagateway_apikey' => env('WAGATEWAY_APIKEY'),
 
     'url_retribusi' => env('URL_RETRIBUSI'),
+    'url_sftp' => env('URL_SFTP'),
 
     'timezone' => 'UTC',
     'timezone' => 'Asia/Jakarta',

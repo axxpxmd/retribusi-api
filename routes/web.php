@@ -33,12 +33,10 @@ $router->post('callback-qris', 'BJB\CallBackController@callbackQRIS');
 
 $router->get('no-bayar/{no_bayar}', 'Client\SKRDController@showNoBayar');
 $router->get('bukti-sts/{no_bayar}', 'Client\SKRDController@showPDFSTS');
+$router->get('bukti-skrd/{no_bayar}', 'Client\SKRDController@showPDFSKRD');
 
 //* --------------------- Client ------------------- *//
 $router->group(['namespace' => 'Client'], function () use ($router) {
-    // Booking
-    $router->post('booking-create', 'BookingController@createBooking');
-
     // SKRD
     $router->get('skrd', 'SKRDController@index');
     $router->post('skrd', 'SKRDController@store');
