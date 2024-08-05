@@ -465,7 +465,7 @@ class SKRDController extends Controller
                 ], 404);
 
             $fileName = str_replace(' ', '', $data->nm_wajib_pajak) . '-' . $data->no_skrd . ".pdf";
-            $link = config('app.ip_api_bjb') . $fileName;
+            $link = config('app.url_sftp') . $fileName;
 
             return response()->json([
                 'status'  => 200,
